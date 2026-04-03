@@ -1,3 +1,4 @@
+# pyright: reportMissingImports=false, reportMissingModuleSource=false
 from google.colab import files
 uploaded = files.upload()
 

@@ -10,12 +10,21 @@ torch>=2.2.0
 torchvision>=0.17.0
 pillow>=10.0.0
 numpy>=1.26.0
+pandas>=2.2.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+opencv-python-headless>=4.10.0.0
+tensorflow>=2.17.0
+keras>=3.3.0
+
+# Kaggle dataset helper used by Model/offline/Fine_tuned_model.py
+kagglehub>=0.3.0
 
 # Networking / utilities
 requests>=2.31.0
 
-# Notebook / Colab-related imports used in Model/online/onlinemodel.py
-google-colab>=1.0.0
+# Notebook imports used in Model/online/onlinemodel.py
+# google-colab is Colab-only and is not available for local Windows installs.
 ipywidgets>=8.1.0
 ipython>=8.0.0
 

@@ -1,3 +1,4 @@
+# pyright: reportMissingImports=false, reportMissingModuleSource=false
 # -*- coding: utf-8 -*-
 """Plant_Diseases_Detection_FineTuned.ipynb
 
@@ -12,7 +13,9 @@ try:
     import cv2
     import ipywidgets
 except ImportError:
-    !pip install opencv-python-headless ipywidgets
+    raise ImportError(
+        "Install the project requirements before running this script locally."
+    )
 
 #print("✅ Core dependencies ready.")
 
@@ -162,7 +165,7 @@ import matplotlib.pyplot as plt
 plt.plot(history.history['accuracy'],color='red',label='train')
 plt.plot(history.history['val_accuracy'],color='blue',label='validation')
 plt.legend()
-plt.show
+plt.show()
 
 model.save('plant_disease_model_1.keras')
 
