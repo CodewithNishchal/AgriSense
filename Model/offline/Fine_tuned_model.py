@@ -272,4 +272,89 @@ TREATMENT_GUIDE = {
     'Tomato___Tomato_mosaic_virus': '• Do not use tobacco near plants. • Wash hands after handling infected plants. • Remove and burn infected bushes.',
     'Tomato___healthy': '• Vibrant health. Support with cages. • Water consistently at the base. • Prune suckers for better fruit size.'
 }
-print("✅ Validation and Treatment Logic Loaded.")
+print(" Validation and Treatment Logic Loaded.")
+
+def diagnostic_pipeline(img_path, active_model, classes, threshold=0.8):
+    """
+    Full diagnostic flow: Quality -> Inference -> Threshold -> Actionable Output
+    """
+    # 1. Image Quality Check
+    is_valid, err_msg = validate_image_quality(img_path)
+    if not is_valid:
+        print(f" QUALITY WARNING: {err_msg}")
+        return
+
+    # 2. Pre-process
+    img = image.load_img(img_path, target_size=(256, 256))
+    x = image.img_to_array(img) / 255.0
+    x = np.expand_dims(x, axis=0)
+
+    # 3. Predict
+    preds = active_model.predict(x, verbose=0)
+    confidence = np.max(preds)
+    cls_idx = np.argmax(preds)
+    result_name = classes[cls_idx]
+
+    # 4. Apply Confidence Gate
+    plt.imshow(img)
+    plt.axis('off')
+    if confidence < threshold:
+        plt.title(f"Low Confidence ({confidence*100:.1f}%)", color='red')
+        print(f" NOT CONFIDENT: Model is only {confidence*100:.1f}% sure that this is {result_name}.")
+        print("Please provide a clearer, closer photo of the leaf symptoms.")
+    else:
+        plt.title(f"{result_name} ({confidence*100:.1f}%)", color='green')
+        print(f" DIAGNOSIS: {result_name}")
+        print(f" CONFIDENCE: {confidence*100:.1f}%")
+        print("\n ACTIONABLE TREATMENTS:")
+        treatments = TREATMENT_GUIDE.get(result_name, "- Observe and monitor carefully.")
+        for t in treatments.split('•'):
+             if t.strip(): print(f"  ✅ {t.strip()}")
+    plt.show()
+
+import ipywidgets as widgets
+from IPython.display import display, clear_output
+
+uploader = widgets.FileUpload(accept='image/*', multiple=False)
+output = widgets.Output()
+
+def on_upload(change):
+    with output:
+        clear_output()
+        if not uploader.value: return
+
+        # Compatibility for ipywidgets v7 and v8
+        try:
+            file_info = uploader.value[0]
+            content = file_info['content']
+            fname = file_info['name']
+        except:
+            fname = list(uploader.value.keys())[0]
+            content = uploader.value[fname]['content']
+
+        with open("temp_leaf.jpg", "wb") as f: f.write(content)
+        print(f" Scanning {fname}...")
+
+        # Determine model var
+        active_model = None
+        if 'loaded_model' in globals(): active_model = loaded_model
+        elif 'model' in globals(): active_model = model
+
+        if active_model and 'Diseases_classes' in globals():
+            diagnostic_pipeline("temp_leaf.jpg", active_model, Diseases_classes)
+        else:
+            print(" ERROR: Model or class names not found. Run training cells first.")
+
+uploader.observe(on_upload, names='value')
+print("--- PLANT DIAGNOSTIC INTERFACE ---")
+display(uploader, output)
+
+# Save in the latest Keras format (best for portability)
+if 'model' in globals():
+    model.save('plant_disease_model.keras')
+    print(" Saved trained model as: plant_disease_model.keras")
+elif 'loaded_model' in globals():
+    loaded_model.save('plant_disease_model.keras')
+    print(" Re-saved loaded model as: plant_disease_model.keras")
+else:
+    print(" No model found in memory to save.")
