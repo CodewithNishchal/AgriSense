@@ -1,0 +1,24 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
+pydantic>=2.6.0
+python-dotenv>=1.0.0
+supabase>=2.4.0
+
+# ML / vision
+torch>=2.2.0
+torchvision>=0.17.0
+pillow>=10.0.0
+numpy>=1.26.0
+
+# Networking / utilities
+requests>=2.31.0
+
+# Notebook / Colab-related imports used in Model/online/onlinemodel.py
+google-colab>=1.0.0
+ipywidgets>=8.1.0
+ipython>=8.0.0
+
+# Audio / speech (if used by your pipeline)
+openai-whisper
+sounddevice>=0.5.1
