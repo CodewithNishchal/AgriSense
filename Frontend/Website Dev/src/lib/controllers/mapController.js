@@ -3,7 +3,7 @@ import pool from "../config/supabase";
 export const getMapMarkers = async () => {
     try {
         const client = await pool.connect();
-        
+
         // Fetch all disease scans from the public schema
         // Fetch aggregated disease scans grouped by approximate geographic coordinate (creates natural spatial clusters)
         const res = await client.query(`
