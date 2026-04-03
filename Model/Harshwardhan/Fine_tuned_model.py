@@ -101,3 +101,93 @@ conv_base = keras.applications.Xception(
     weights='imagenet',  # Load weights pre-trained on ImageNet.
     input_shape=(256, 256, 3),
     include_top=False)  # Do not include the ImageNet classifier at the top.
+
+conv_base.trainable = True
+
+set_trainable = False
+
+for layer in conv_base.layers:
+  if layer.name == 'block14_sepconv1':
+    set_trainable = True
+  if set_trainable:
+    layer.trainable = True
+  else:
+    layer.trainable = False
+
+for layer in conv_base.layers:
+  print(layer.name,layer.trainable)
+
+conv_base.summary()
+
+model = Sequential()
+
+model.add(conv_base)
+model.add(Flatten())
+model.add(Dense(128,activation='relu'))
+model.add(Dropout(0.1))
+model.add(Dense(64,activation='relu'))
+model.add(Dropout(0.1))
+model.add(Dense(len(Diseases_classes),activation='softmax'))
+
+
+
+# model=Sequential()
+# model.add(Conv2D(32,kernel_size=(3,3),padding='valid',activation='relu',input_shape=(256,256,3)))
+# model.add(BatchNormalization())
+# model.add(MaxPooling2D(pool_size=(2,2),strides=2,padding='valid'))
+
+# model.add(Conv2D(64,kernel_size=(3,3),padding='valid',activation='relu'))
+# model.add(BatchNormalization())
+# model.add(MaxPooling2D(pool_size=(2,2),strides=2,padding='valid'))
+
+# model.add(Conv2D(128,kernel_size=(3,3),padding='valid',activation='relu'))
+# model.add(BatchNormalization())
+# model.add(MaxPooling2D(pool_size=(2,2),strides=2,padding='valid'))
+
+# model.add(Flatten())
+
+# model.add(Dense(128,activation='relu'))
+# model.add(Dropout(0.1))
+# model.add(Dense(64,activation='relu'))
+# model.add(Dropout(0.1))
+# model.add(Dense(len(Diseases_classes),activation='softmax'))
+
+model.compile(optimizer='adam',loss='sparse_categorical_crossentropy',metrics=['accuracy'])
+
+model.summary()
+
+history=model.fit(train_ds,epochs=10,validation_data=validation_ds)
+
+import matplotlib.pyplot as plt
+plt.plot(history.history['accuracy'],color='red',label='train')
+plt.plot(history.history['val_accuracy'],color='blue',label='validation')
+plt.legend()
+plt.show
+
+model.save('plant_disease_model_1.keras')
+
+from tensorflow import keras
+
+loaded_model = keras.models.load_model('plant_disease_model.keras')
+print('Model loaded successfully.')
+
+# Make predictions on the test data
+predictions = loaded_model.predict(test_ds)
+
+# Get predicted class indices
+predicted_classes = np.argmax(predictions, axis=1)
+
+print(f"Predictions made for {len(predicted_classes)} test images.")
+
+# Display some sample predictions
+plt.figure(figsize=(20, 10))
+for i, (image, true_label) in enumerate(test_ds.unbatch().take(9)):
+    ax = plt.subplot(3, 3, i + 1)
+    plt.imshow(image.numpy())
+    predicted_class_index = predicted_classes[i]
+    predicted_disease = Diseases_classes[predicted_class_index]
+    true_disease = Diseases_classes[true_label.numpy()]
+    plt.title(f"True: {true_disease}\nPredicted: {predicted_disease}")
+    plt.axis("off")
+plt.show()
+
