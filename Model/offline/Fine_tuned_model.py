@@ -14,7 +14,7 @@ try:
 except ImportError:
     !pip install opencv-python-headless ipywidgets
 
-print("✅ Core dependencies ready.")
+#print("✅ Core dependencies ready.")
 
 # IMPORTANT: RUN THIS CELL IN ORDER TO IMPORT YOUR KAGGLE DATA SOURCES,
 # THEN FEEL FREE TO DELETE THIS CELL.
@@ -45,8 +45,8 @@ valid_dir = Root_dir + "/valid"
 test_dir = "/kaggle/input/new-plant-diseases-dataset/test"
 Diseases_classes = os.listdir(train_dir)
 
-from google.colab import drive
-drive.mount('/content/drive')
+#from google.colab import drive
+#drive.mount('/content/drive')
 
 plant_names = []
 Len = []
@@ -191,3 +191,82 @@ for i, (image, true_label) in enumerate(test_ds.unbatch().take(9)):
     plt.axis("off")
 plt.show()
 
+"""1. **Validation**: Checks for blur, exposure, and leaf presence.
+2. **Threshold**: 80% confidence required for diagnosis.
+3. **Treatments**: Detailed advice for all 38 classes.
+"""
+
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.keras.preprocessing import image
+
+def validate_image_quality(img_path):
+    """
+    Analyzes image quality for brightness, sharpness, and plant content.
+    Returns: (bool, message)
+    """
+    img = cv2.imread(img_path)
+    if img is None: return False, "Invalid image file."
+
+    # 1. Brightness Check
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    brightness = np.mean(gray)
+    if brightness < 40: return False, "Image is too dark."
+    if brightness > 240: return False, "Image is overexposed."
+
+    # 2. Sharpness Check
+    laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+    if laplacian_var < 70: return False, "Image is too blurry. Focus on the leaf."
+
+    # 3. Plant Tone Check (HSV color mask)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    lower = np.array([10, 20, 20])   # Broader range for leaves (Green to Brown)
+    upper = np.array([100, 255, 255])
+    mask = cv2.inRange(hsv, lower, upper)
+    ratio = np.count_nonzero(mask) / (img.shape[0] * img.shape[1])
+    if ratio < 0.1: return False, "No plant material detected. Center the leaf."
+
+    return True, "Quality check passed."
+
+TREATMENT_GUIDE = {
+    'Apple___Apple_scab': '• Remove fallen leaves to reduce inoculum. • Apply sulfur or copper-based fungicides in early spring. • Improve air circulation through pruning.',
+    'Apple___Black_rot': '• Prune out dead wood and cankers during dormancy. • Remove mummified fruit from the tree. • Apply appropriate fungicides from bloom to harvest.',
+    'Apple___Cedar_apple_rust': '• Remove nearby juniper/cedar trees if possible. • Apply protective fungicides in early spring. • Plant rust-resistant apple varieties.',
+    'Apple___healthy': '• Healthy plant. Maintain regular watering. • Use a balanced fertilizer. • Monitor for early signs of pests.',
+    'Blueberry___healthy': '• Healthy plant. Maintain acidic soil (pH 4.5-5.5). • Mulch to retain moisture. • Prune old wood every year.',
+    'Cherry_(including_sour)___Powdery_mildew': '• Apply horticultural oil or potassium bicarbonate. • Prune to improve airflow. • Avoid overhead irrigation.',
+    'Cherry_(including_sour)___healthy': '• Healthy tree. Ensure adequate spacing. • Monitor for aphids. • Maintain consistent soil moisture.',
+    'Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot': '• Use resistant hybrids. • Rotate crops with non-grasses. • Apply foliar fungicides if disease is severe.',
+    'Corn_(maize)___Common_rust_': '• Plant resistant hybrids. • Application of fungicides is rarely needed unless infection is early. • Rotate crops.',
+    'Corn_(maize)___Northern_Leaf_Blight': '• Use resistant cultivars. • Manage crop residue through tillage. • Rotate with crops like soybean.',
+    'Corn_(maize)___healthy': '• Optimal health. Maintain nitrogen levels. • Scouting for early insect damage. • Ensure good drainage.',
+    'Grape___Black_rot': '• Practice meticulous sanitation—remove all old fruit. • Apply fungicides (mancozeb, myclobutanil). • Prune for sunlight and air.',
+    'Grape___Esca_(Black_Measles)': '• Proper pruning and wound protection. • Remove and destroy infected wood. • No effective fungicide currently exists for established Esca.',
+    'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)': '• Post-harvest fungicide application. • Prune to increase air circulation. • Remove infected debris.',
+    'Grape___healthy': '• Healthy vine. Continue balanced fertilizing. • Prune to maintain canopy. • Monitor for mites.',
+    'Orange___Haunglongbing_(Citrus_greening)': '• Remove infected trees immediately. • Control citrus psyllid vector with insecticides. • Use psyllid-free nursery stock.',
+    'Peach___Bacterial_spot': '• Use resistant varieties. • Apply copper-based sprays in fall/winter. • Avoid excess nitrogen fertilization.',
+    'Peach___healthy': '• Healthy tree. Monitor for borers. • Thin fruit to prevent branch breakage. • Prune to an open-center shape.',
+    'Pepper,_bell___Bacterial_spot': '• Use disease-free seeds/transplants. • Apply copper-based bactericides. • Rotate crops every 3 years.',
+    'Pepper,_bell___healthy': '• Healthy plant. Support with stakes. • Mulch to keep soil moist. • Avoid touching plants when wet.',
+    'Potato___Early_blight': '• Use certified seeds. • Rotate with non-solanaceous crops. • Apply fungicides containing chlorothalonil.',
+    'Potato___Late_blight': '• Use resistant varieties. • Destroy cull piles and volunteers. • Apply protective fungicides (ridomil) regularly.',
+    'Potato___healthy': '• Healthy crop. Maintain even moisture. • Hill up soil around stems. • Monitor for Colorado Potato Beetle.',
+    'Raspberry___healthy': '• Healthy patch. Thin canes for air. • Maintain 2-3 inches of mulch. • Prune out old canes after harvest.',
+    'Soybean___healthy': '• Healthy crop. Scout for Japanese beetles. • Monitor for soybean rust. • Maintain weed control.',
+    'Squash___Powdery_mildew': '• Apply neem oil or sulfur. • Sprout resistant varieties. • Avoid high-nitrogen fertilizers which boost mildew.',
+    'Strawberry___Leaf_scorch': '• Renovate beds after harvest. • Remove old foliage. • Apply fungicides if infection is heavy.',
+    'Strawberry___healthy': '• Excellent condition. Mulch with straw. • Remove runners to increase yield. • Pick berries promptly.',
+    'Tomato___Bacterial_spot': '• Avoid overhead water. • Apply copper fungicides. • Space plants for better air movement.',
+    'Tomato___Early_blight': '• Remove lower leaves near ground. • Mulch around base. • Apply fungicides (copper/sulfur) at first sign.',
+    'Tomato___Late_blight': '• High risk. Space plants widely. • Apply fungicides early. • Remove and destroy infected plants immediately.',
+    'Tomato___Leaf_Mold': '• Increase ventilation. • Keep foliage dry. • Reduce humidity in greenhouse settings.',
+    'Tomato___Septoria_leaf_spot': '• Remove infected bottom leaves. • Clean up garden debris in fall. • Use copper or chlorothalonil sprays.',
+    'Tomato___Spider_mites Two-spotted_spider_mite': '• Use insecticidal soap or oil. • Blast leaves with water. • Encourage natural predators like ladybugs.',
+    'Tomato___Target_Spot': '• Ensure wide spacing. • Prune suckers to improve air. • Use chlorothalonil or mancozeb fungicides.',
+    'Tomato___Tomato_Yellow_Leaf_Curl_Virus': '• Use reflective mulch to deter whiteflies. • Remove weed hosts. • Plant virus-resistant varieties.',
+    'Tomato___Tomato_mosaic_virus': '• Do not use tobacco near plants. • Wash hands after handling infected plants. • Remove and burn infected bushes.',
+    'Tomato___healthy': '• Vibrant health. Support with cages. • Water consistently at the base. • Prune suckers for better fruit size.'
+}
+print("✅ Validation and Treatment Logic Loaded.")
