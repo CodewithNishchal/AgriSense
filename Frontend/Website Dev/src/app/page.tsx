@@ -59,30 +59,36 @@ export default function LandingPage() {
 
 
       {/* OVERLAY / FOREGROUND UI */}
-      <div className="relative z-10 flex flex-col h-screen max-w-[1600px] mx-auto px-8 xl:px-16 pt-8 pb-0">
+      <div className="relative z-10 flex flex-col h-screen max-w-[1600px] mx-auto px-4 xl:px-8 pt-8 pb-0">
         
         {/* TOP NAVBAR */}
-        <nav className="flex justify-between items-center mb-auto animate-in slide-in-from-top duration-700 relative z-40">
-          {/* Logo */}
-          <div className="flex items-center gap-4 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full shadow-sm border border-white/50">
-            <div className="w-14 h-14 flex items-center justify-center overflow-hidden shrink-0">
-               <img src="/agrisense_logo.png" alt="AgriSense Logo" className="w-full h-full object-contain scale-125 hover:scale-110 transition-transform cursor-pointer" />
+        <nav className="grid grid-cols-3 items-center mb-auto animate-in slide-in-from-top duration-700 relative z-40">
+          {/* Left: Logo */}
+          <div className="flex justify-start">
+            <div className="flex items-center gap-4 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full shadow-sm border border-white/50">
+              <div className="w-14 h-14 flex items-center justify-center overflow-hidden shrink-0">
+                 <img src="/agrisense_logo.png" alt="AgriSense Logo" className="w-full h-full object-contain scale-125 hover:scale-110 transition-transform cursor-pointer" />
+              </div>
+              <span className="text-3xl font-black tracking-tighter text-[#1a231f]">AgriSense<span className="text-green-600 drop-shadow-sm">°</span></span>
             </div>
-            <span className="text-3xl font-black tracking-tighter text-[#1a231f]">AgriSense<span className="text-green-600 drop-shadow-sm">°</span></span>
           </div>
 
-          {/* Nav Links */}
-          <div className="hidden md:flex items-center gap-10 font-semibold text-sm text-[#1a231f] bg-white/90 backdrop-blur-md px-8 py-3.5 rounded-full shadow-sm border border-white/50">
-            <div className="flex items-center gap-1 cursor-pointer hover:text-green-700 transition-colors">Portals <ChevronDown className="w-4 h-4" /></div>
-            <div className="cursor-pointer hover:text-green-700 transition-colors">Help</div>
-            <div className="flex items-center gap-1 cursor-pointer hover:text-green-700 transition-colors">Pricing <ChevronDown className="w-4 h-4" /></div>
-            <div className="cursor-pointer hover:text-green-700 transition-colors">Partners</div>
+          {/* Center: Nav Links */}
+          <div className="hidden md:flex justify-center">
+            <div className="flex items-center gap-10 font-semibold text-sm text-[#1a231f] bg-white/90 backdrop-blur-md px-10 py-3.5 rounded-full shadow-sm border border-white/50">
+              <div className="flex items-center gap-1 cursor-pointer hover:text-green-700 transition-colors">Portals <ChevronDown className="w-4 h-4" /></div>
+              <div className="cursor-pointer hover:text-green-700 transition-colors">Help</div>
+              <div className="flex items-center gap-1 cursor-pointer hover:text-green-700 transition-colors">Pricing <ChevronDown className="w-4 h-4" /></div>
+              <div className="cursor-pointer hover:text-green-700 transition-colors">Partners</div>
+            </div>
           </div>
 
-          {/* CTA Button */}
-          <Link href="/login" className="px-6 py-3 bg-white/90 rounded-full border border-white/50 font-semibold flex items-center gap-2 hover:bg-white hover:scale-105 backdrop-blur-md transition-all shadow-md">
-            Get the App <Play className="w-4 h-4 fill-[#1a231f]" />
-          </Link>
+          {/* Right: CTA Button */}
+          <div className="flex justify-end">
+            <Link href="/login" className="px-8 py-3.5 bg-white/90 rounded-full border border-white/50 font-bold text-sm flex items-center gap-2 hover:bg-white hover:scale-105 backdrop-blur-md transition-all shadow-md">
+              Get the App <Play className="w-4 h-4 fill-[#1a231f]" />
+            </Link>
+          </div>
         </nav>
 
         {/* HERO CONTENT */}
@@ -114,19 +120,19 @@ export default function LandingPage() {
             </div>
 
             {/* Top Left Badge */}
-            <div className="absolute top-[8%] right-[10%] bg-white/70 backdrop-blur-md px-5 py-3 rounded-full border border-white/50 shadow-xl flex items-center gap-3 transform -rotate-1 animate-in fade-in duration-1000 delay-300">
-               <Leaf className="w-5 h-5 text-green-700" />
-               <span className="text-sm font-bold text-gray-800">Tough Pathogens? We'll spot them instantly!</span>
+            <div className="absolute top-[8%] right-[10%] bg-white/40 backdrop-blur-sm px-5 py-3 rounded-full border border-white/30 shadow-sm flex items-center gap-3 transform -rotate-1 opacity-50 animate-in fade-in duration-1000 delay-300">
+               <Leaf className="w-5 h-5 text-green-700/60" />
+               <span className="text-sm font-bold text-gray-800/60">Tough Pathogens? We'll spot them instantly!</span>
             </div>
 
             {/* Drone/Scan Icon */}
-            <div className="absolute top-[35%] right-[25%] w-16 h-16 bg-white/80 backdrop-blur-md border border-white/60 rounded-full flex items-center justify-center shadow-xl transform rotate-12 hover:scale-110 transition-transform cursor-pointer">
-               <ScanLine className="w-7 h-7 text-gray-800" />
+            <div className="absolute top-[35%] right-[25%] w-16 h-16 bg-white/40 backdrop-blur-sm border border-white/40 rounded-full flex items-center justify-center shadow-lg transform rotate-12 opacity-40 hover:opacity-100 transition-all cursor-pointer">
+               <ScanLine className="w-7 h-7 text-gray-800/50" />
             </div>
 
             {/* Map Icon Box */}
-            <div className="absolute top-[60%] left-[8%] w-16 h-16 pointer-events-auto cursor-pointer hover:scale-110 transition-transform bg-gradient-to-tr from-green-500 to-emerald-300 rounded-3xl flex items-center justify-center shadow-[0_20px_40px_rgba(40,209,140,0.4)] skew-y-3">
-               <Map className="w-8 h-8 text-white" />
+            <div className="absolute top-[60%] left-[8%] w-16 h-16 pointer-events-auto cursor-pointer hover:scale-110 opacity-30 hover:opacity-100 transition-all bg-gradient-to-tr from-green-500/50 to-emerald-300/50 rounded-3xl flex items-center justify-center shadow-lg skew-y-3">
+               <Map className="w-8 h-8 text-white/70" />
             </div>
 
             {/* BUTTON / Inspector CTA */}
@@ -150,18 +156,18 @@ export default function LandingPage() {
              <div className="absolute inset-0 cursor-default" />
             
             {/* Top Right Mini Icons */}
-            <div className="absolute top-[18%] left-[10%] w-12 h-12 bg-white/60 backdrop-blur border border-white/40 rounded-full flex items-center justify-center shadow-lg">
-               <Hexagon className="w-5 h-5 text-orange-600" />
+            <div className="absolute top-[18%] left-[10%] w-12 h-12 bg-white/30 backdrop-blur border border-white/30 rounded-full flex items-center justify-center shadow-sm opacity-40">
+               <Hexagon className="w-5 h-5 text-orange-600/50" />
             </div>
             
             {/* Right Badge */}
-            <div className="absolute top-[40%] right-[15%] bg-[#efdcd0]/80 backdrop-blur-md px-5 py-3 rounded-full border border-white/50 shadow-xl flex items-center gap-3 transform rotate-2 animate-in fade-in duration-1000 delay-500">
-               <span className="text-sm font-bold text-gray-800">We'll Handle Any Terrain — Guaranteed</span>
-               <Sprout className="w-5 h-5 text-[#885a3a]" />
+            <div className="absolute top-[40%] right-[15%] bg-[#efdcd0]/40 backdrop-blur-sm px-5 py-3 rounded-full border border-white/30 shadow-sm flex items-center gap-3 transform rotate-2 opacity-50 animate-in fade-in duration-1000 delay-500">
+               <span className="text-sm font-bold text-gray-800/60">We'll Handle Any Terrain — Guaranteed</span>
+               <Sprout className="w-5 h-5 text-[#885a3a]/60" />
             </div>
 
-            <div className="absolute top-[60%] right-[32%] w-12 h-12 bg-white/50 backdrop-blur border border-white/50 rounded-full flex items-center justify-center shadow-md">
-               <Droplet className="w-5 h-5 text-gray-700" />
+            <div className="absolute top-[60%] right-[32%] w-12 h-12 bg-white/20 backdrop-blur border border-white/30 rounded-full flex items-center justify-center shadow-sm opacity-30">
+               <Droplet className="w-5 h-5 text-gray-700/50" />
             </div>
 
              {/* BUTTON / Farmer CTA */}

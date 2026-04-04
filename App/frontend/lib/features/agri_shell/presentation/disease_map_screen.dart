@@ -75,7 +75,7 @@ class _DiseaseMapScreenState extends State<DiseaseMapScreen> {
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
               isDense: true,
-              value: _district,
+              initialValue: _district,
               decoration: const InputDecoration(
                 labelText: 'District / region',
                 filled: true,

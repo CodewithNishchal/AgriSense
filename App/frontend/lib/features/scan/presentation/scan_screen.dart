@@ -1,11 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/layout/app_breakpoints.dart';
 import '../../../core/location/location_helper.dart';
+import '../../../core/ml/tflite_helper.dart';
+import '../../../core/network/disease_diagnosis_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/editorial_scaffold.dart';
+import '../../disease_detection/data/disease_data.dart';
+import '../../disease_detection/data/plant_village_labels.dart';
+import '../../tflite_debug/intelligence_report_builder.dart';
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -18,12 +26,14 @@ class _ScanScreenState extends State<ScanScreen> {
   final ImagePicker _picker = ImagePicker();
   bool _loading = false;
 
-  static const _mockDiseaseSteps = <String>[
-    'Isolate affected plants to slow spread.',
-    'Remove yellowed leaves; destroy debris off-field.',
-    'Apply copper-based fungicide per label (7–10 day interval).',
-    'Avoid overhead irrigation; improve row airflow.',
-  ];
+  static const double _kMinConfidence = 0.40;
+
+  @override
+  void initState() {
+    super.initState();
+    TFLiteHelper.instance.ensureInitialized();
+    IntelligenceReportBuilder.ensureLoaded().catchError((_) {});
+  }
 
   Future<void> _runDiseaseFlow(ImageSource source) async {
     final XFile? file = await _picker.pickImage(
@@ -33,28 +43,103 @@ class _ScanScreenState extends State<ScanScreen> {
     );
     if (file == null || !mounted) return;
     setState(() => _loading = true);
-    await Future<void>.delayed(const Duration(milliseconds: 600));
     String? locationLabel;
+    double? lat;
+    double? lon;
     try {
       final pos = await LocationHelper.getCurrentPosition();
-      locationLabel = pos != null ? LocationHelper.formatPosition(pos) : null;
+      if (pos != null) {
+        locationLabel = LocationHelper.formatPosition(pos);
+        lat = pos.latitude;
+        lon = pos.longitude;
+      }
     } catch (_) {
       locationLabel = null;
     }
+
+    final tfResult =
+        await TFLiteHelper.instance.analyzeImageDebug(File(file.path));
+
     if (!mounted) return;
     setState(() => _loading = false);
-    await context.push<void>(
-      '/disease-result',
-      extra: {
-        'diseaseName': 'Tomato Late Blight',
-        'confidence': 0.92,
-        'treatment':
-            'Remove affected leaves. Apply copper-based fungicide every 7–10 days. Avoid overhead irrigation. Ensure good air circulation.',
-        'remediationSteps': _mockDiseaseSteps,
-        'imagePath': file.path,
-        'locationLabel': locationLabel,
-      },
-    );
+
+    if (tfResult == null) {
+      if (!mounted) return;
+      final detail = TFLiteHelper.instance.describeFailure();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(detail, style: const TextStyle(fontSize: 13)),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 8),
+        ),
+      );
+      return;
+    }
+
+    final confidence = (tfResult['confidence'] as num).toDouble();
+    final classIndex = tfResult['index'] as int;
+    final rawOutput = tfResult['raw_output'] as List<double>;
+    final scanTime = DateFormat('MMM d, yyyy • h:mm a').format(DateTime.now());
+
+    if (classIndex < 0 || classIndex >= kPlantVillage38ClassLabels.length) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Model class index $classIndex is outside 0–${kPlantVillage38ClassLabels.length - 1}. '
+            'Check label list vs your .tflite.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    if (confidence <= _kMinConfidence) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Could not identify disease confidently. Please retake the photo.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final diseaseKey = kPlantVillage38ClassLabels[classIndex];
+
+    Map<String, dynamic> extra;
+    try {
+      await IntelligenceReportBuilder.ensureLoaded();
+      final fullReport = await IntelligenceReportBuilder.build(
+        diseaseKey: diseaseKey,
+        confidenceRaw: confidence,
+        rawOutput: rawOutput,
+        topK: 3,
+        lat: lat,
+        lon: lon,
+      );
+      fullReport['scan_time_display'] = scanTime;
+      extra = DiseaseDiagnosisService.toResultExtra(fullReport);
+    } catch (_) {
+      final fallback = buildOfflineTfliteResultExtra(
+        classIndex: classIndex,
+        confidenceRaw: confidence,
+        imagePath: file.path,
+        scanTimeDisplay: scanTime,
+        locationLabel: locationLabel,
+        lat: lat,
+        lon: lon,
+      );
+      extra = Map<String, dynamic>.from(fallback);
+    }
+
+    extra['imagePath'] = file.path;
+    extra['locationLabel'] = locationLabel;
+
+    await context.push<void>('/disease-result', extra: extra);
   }
 
   Future<void> _runPestFlow(ImageSource source) async {
@@ -106,7 +191,7 @@ class _ScanScreenState extends State<ScanScreen> {
             icon: Icons.eco_rounded,
             title: 'Disease detection',
             subtitle:
-                'Gallery or camera — mock ML result (wire to /api/analyze).',
+                'On-device TFLite + intelligence report (protocols). No network.',
             color: AppColors.primary,
             onGallery: () => _runDiseaseFlow(ImageSource.gallery),
             onCamera: () => _runDiseaseFlow(ImageSource.camera),
