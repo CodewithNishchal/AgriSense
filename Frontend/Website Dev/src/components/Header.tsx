@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const randomNotifications = [
   { id: 1, text: "TRC-08 fuel level dropped below 12%", time: "2 min ago", type: "critical" },
@@ -15,7 +17,19 @@ interface HeaderProps {
 
 export default function Header({ title = "AgriSense Marketplace Fleet" }: HeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const isInspectionPage = pathname.includes('inspectionDashboard');
+
+  const onLogout = async () => {
+    try {
+      await axios.get("/api/users/logout");
+      toast.success("Logged out successfully");
+      router.push("/");
+    } catch (error: any) {
+      console.log("Logout error", error.message);
+      toast.error("Logout failed");
+    }
+  };
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -224,7 +238,10 @@ export default function Header({ title = "AgriSense Marketplace Fleet" }: Header
 
               {/* Logout Footer */}
               <div className="p-2 border-t border-gray-50 dark:border-gray-800/60 bg-gray-50/20">
-                <div className="flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer group">
+                <div 
+                  onClick={onLogout}
+                  className="flex items-center gap-3 px-3 py-2 rounded-xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer group"
+                >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                   <span className="text-[12px] font-black uppercase tracking-widest">Logout</span>
                 </div>

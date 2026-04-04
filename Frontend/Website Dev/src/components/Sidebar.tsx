@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 interface SidebarProps {
   isDarkMode: boolean;
@@ -9,6 +12,18 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isDarkMode, setIsDarkMode }: SidebarProps) {
+  const router = useRouter();
+
+  const onLogout = async () => {
+    try {
+      await axios.get("/api/users/logout");
+      toast.success("Logged out successfully");
+      router.push("/");
+    } catch (error: any) {
+      console.log("Logout failed", error.message);
+      toast.error("Logout failed");
+    }
+  };
   return (
     <div className="relative group z-[100] flex items-start h-full shrink-0">
       {/* Transparent shadow overlay when sidebar expands */}
@@ -99,8 +114,11 @@ export default function Sidebar({ isDarkMode, setIsDarkMode }: SidebarProps) {
 
           {/* Logout Item */}
           <div className="border-t border-gray-100 dark:border-gray-800 pt-2">
-            <div className="flex items-center text-gray-400 hover:text-gray-900 dark:hover:text-white whitespace-nowrap cursor-pointer relative group/item">
-              <div className="absolute inset-y-0 left-2 right-2 rounded-xl group-hover/item:bg-gray-50 dark:group-hover/item:bg-gray-800 transition-colors z-0"></div>
+            <div 
+              onClick={onLogout}
+              className="flex items-center text-gray-400 hover:text-red-500 whitespace-nowrap cursor-pointer relative group/item"
+            >
+              <div className="absolute inset-y-0 left-2 right-2 rounded-xl group-hover/item:bg-red-50 dark:group-hover/item:bg-red-900/10 transition-colors z-0"></div>
               <div className="w-16 h-12 flex items-center justify-center shrink-0 relative z-10">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
