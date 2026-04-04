@@ -20,15 +20,13 @@ export default function Sidebar({ isDarkMode, setIsDarkMode }: SidebarProps) {
       {/* Expanding Sidebar */}
       <aside className="absolute left-0 top-0 bottom-0 w-16 group-hover:w-[260px] transition-all duration-300 ease-in-out flex flex-col py-6 bg-white dark:bg-[#1e293b] rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden group-hover:shadow-2xl z-[100]">
         {/* Logo */}
-        <div className="flex items-center mb-8 relative">
+        <div className="flex items-center mb-10 relative">
           <div className="w-16 flex items-center justify-center shrink-0">
-            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clipRule="evenodd" />
-              </svg>
+            <div className="w-14 h-14 flex items-center justify-center overflow-hidden transition-transform group-hover:scale-110">
+              <img src="/agrisense_logo.png" alt="AgriSense Logo" className="w-full h-full object-contain scale-125" />
             </div>
           </div>
-          <span className="font-extrabold tracking-widest text-green-600 text-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 uppercase whitespace-nowrap">Harvest</span>
+          <span className="font-black tracking-tighter text-gray-900 dark:text-white text-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap ml-3">AgriSense</span>
         </div>
 
         {/* Nav Items */}

@@ -7,6 +7,7 @@ import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, YAxis, Legend,
 } from 'recharts';
 import { Activity, ShieldAlert, AlertTriangle, Search, Bug, ChevronLeft, CloudRain, Thermometer, Droplets, Wind, Zap, Microscope } from 'lucide-react';
+import toast from 'react-hot-toast';
 import type { ThemeTokens } from './themeTokens';
 
 // ─── MOCK DATA ────────────────────────────────────────────────────────────────
@@ -166,6 +167,26 @@ export default function DistrictAnalyticsPanel({
   const xTickStyle = { fontSize: 8, fill: isNightVision ? '#39ff5e44' : '#9ca3af' };
   const cursorStyle = { fill: isNightVision ? 'rgba(57,255,94,0.05)' : 'rgba(16,185,129,0.04)' };
 
+  const handleDispatch = () => {
+    toast.error(`Emergency Response Dispatched to ${districtName}!`, {
+      duration: 5000,
+      icon: '🚨',
+      style: {
+        borderRadius: '16px',
+        background: '#000',
+        color: '#fff',
+        border: '2px solid #ef4444',
+        fontSize: '14px',
+        fontWeight: 'bold',
+        textTransform: 'uppercase',
+        letterSpacing: '1px',
+      },
+    });
+    
+    // Simulate some logs in the marquee or state
+    console.log(`[DISPATCH] Rapid response team initiated for ${districtName}`);
+  };
+
   return (
     <div className={`flex flex-col h-full overflow-hidden p-6 gap-6 ${isNightVision ? 'bg-[#0a0f16]' : 'bg-[#f8fafc]'}`}>
       
@@ -199,7 +220,10 @@ export default function DistrictAnalyticsPanel({
               <button key={r} onClick={() => setTimeRange(r as any)} className={`px-4 py-1.5 text-[11px] font-black rounded-lg transition-all ${timeRange === r ? theme.pillActive : theme.pillInactive}`}>{r}D</button>
             ))}
           </div>
-          <button className="px-5 py-2.5 rounded-xl bg-red-600 text-white text-[11px] font-black uppercase tracking-widest shadow-xl shadow-red-600/20 hover:bg-red-700 transition-colors flex items-center gap-2">
+          <button 
+            onClick={handleDispatch}
+            className="px-5 py-2.5 rounded-xl bg-red-600 text-white text-[11px] font-black uppercase tracking-widest shadow-xl shadow-red-600/20 hover:bg-red-700 transition-colors flex items-center gap-2 hover:scale-105 active:scale-95 duration-200"
+          >
             <ShieldAlert className="w-4 h-4" /> Dispatch Rapid Response
           </button>
         </div>

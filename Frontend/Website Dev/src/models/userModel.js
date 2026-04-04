@@ -24,6 +24,38 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    phone_number: {
+        type: String,
+        default: ""
+    },
+    kyc_document_type: {
+        type: String,
+        default: "Aadhar"
+    },
+    kyc_number: {
+        type: String,
+        default: ""
+    },
+    base_pincode: {
+        type: String,
+        default: ""
+    },
+    service_radius_km: {
+        type: Number,
+        default: 10
+    },
+    total_fleet_size: {
+        type: Number,
+        default: 1
+    },
+    primary_equipment_type: {
+        type: String,
+        default: "Tractors"
+    },
+    upi_id: {
+        type: String,
+        default: ""
+    },
     forgotPasswordToken: String,
     forgotPasswordTokenExpiry: Date,
     verifyToken: String,

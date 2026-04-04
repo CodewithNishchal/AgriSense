@@ -1,0 +1,34 @@
+--- equipment_assets ---
+id (uuid)
+owner_id (uuid)
+asset_tag (character varying)
+category (character varying)
+current_status (character varying)
+hourly_rate_usd (numeric)
+fuel_battery_level (integer)
+latitude (double precision)
+longitude (double precision)
+last_pinged_at (timestamp with time zone)
+Sample: undefined
+
+--- rental_sessions ---
+id (uuid)
+asset_id (uuid)
+renter_name (character varying)
+start_time (timestamp with time zone)
+expected_end_time (timestamp with time zone)
+actual_end_time (timestamp with time zone)
+session_status (character varying)
+total_revenue_generated (numeric)
+Sample: undefined
+
+--- telematics_alerts ---
+id (uuid)
+asset_id (uuid)
+alert_type (character varying)
+severity (character varying)
+message (text)
+is_resolved (boolean)
+created_at (timestamp with time zone)
+Sample: undefined
+

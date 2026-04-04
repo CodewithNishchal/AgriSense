@@ -300,7 +300,12 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const role = searchParams.get("role") || "farmer";
 
-  const [user, setUser] = useState({ email: "", password: "", confirmPassword: "" });
+  const [user, setUser] = useState({ 
+    username: "", email: "", password: "", confirmPassword: "",
+    phone_number: "", kyc_document_type: "Aadhar", kyc_number: "",
+    base_pincode: "", service_radius_km: 10, total_fleet_size: 1,
+    primary_equipment_type: "Tractors", upi_id: ""
+  });
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
@@ -313,9 +318,32 @@ function LoginContent() {
   const accentHover = isInspector ? "#059669" : isLender ? "#d97706" : "#15803d";
   const dashboardPath = isInspector ? "/users/inspectionDashboard" : "/users/fleetDashboard";
 
-  const onLogin = (e: React.FormEvent) => {
+  const onLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    if (tab === "signup") {
+      try {
+        const response = await fetch("/api/users/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(user)
+        });
+        if (response.ok) {
+          toast.success("Account Created! You can now login.");
+          setTab("signin");
+        } else {
+          const data = await response.json();
+          toast.error(data.error || data.message || "Signup failed");
+        }
+      } catch (error: any) {
+        toast.error("An error occurred during signup.");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     setTimeout(() => {
       toast.success(`Welcome! Entering ${isInspector ? "Inspection Hub" : isLender ? "Lender Portal" : "Fleet Ops"}…`);
       router.push(dashboardPath);
@@ -430,6 +458,23 @@ function LoginContent() {
 
           {/* Form */}
           <form onSubmit={onLogin} className="flex flex-col gap-3">
+            {/* Username — visible on Sign Up only */}
+            <div className={`confirm-field ${tab === 'signup' ? 'open' : 'closed'}`}>
+              <div>
+                <div className="relative pt-0">
+                  <input
+                    type="text"
+                    value={user.username}
+                    onChange={e => setUser({ ...user, username: e.target.value })}
+                    placeholder="Choose a username"
+                    className="field-input pr-10"
+                    tabIndex={tab === 'signup' ? 0 : -1}
+                  />
+                  <UserCheck className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
             <div className="relative">
               <input
                 type="email"
@@ -459,9 +504,9 @@ function LoginContent() {
             </div>
 
             {/* Confirm Password — visible on Sign Up only */}
-            <div className={`confirm-field ${tab === 'signup' ? 'open' : 'closed'}`}>
+            <div className={`confirm-field gap-3 ${tab === 'signup' ? 'open' : 'closed'}`}>
               <div>
-                <div className="relative pt-0">
+                <div className="relative pt-0 mb-3">
                   <input
                     type={showConfirmPass ? "text" : "password"}
                     value={user.confirmPassword}
@@ -478,6 +523,35 @@ function LoginContent() {
                   >
                     {showConfirmPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
+                </div>
+
+                {/* Additional Merchant Fields for Signup */}
+                <div className="flex flex-col gap-3 pt-2 mt-1 border-t border-slate-100">
+                  <div className="grid grid-cols-2 gap-3">
+                    <input type="tel" value={user.phone_number} onChange={e => setUser({...user, phone_number: e.target.value})} placeholder="Phone Number" className="field-input text-xs" tabIndex={tab === 'signup' ? 0 : -1} />
+                    <input type="text" value={user.kyc_number} onChange={e => setUser({...user, kyc_number: e.target.value})} placeholder="KYC ID Number" className="field-input text-xs" tabIndex={tab === 'signup' ? 0 : -1} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <select value={user.kyc_document_type} onChange={e => setUser({...user, kyc_document_type: e.target.value})} className="field-input text-xs" tabIndex={tab === 'signup' ? 0 : -1}>
+                      <option value="Aadhar">Aadhar Card</option>
+                      <option value="PAN">PAN Card</option>
+                      <option value="DL">Driving License</option>
+                    </select>
+                    <input type="text" value={user.base_pincode} onChange={e => setUser({...user, base_pincode: e.target.value})} placeholder="Base Pincode" className="field-input text-xs" tabIndex={tab === 'signup' ? 0 : -1} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input type="number" value={user.service_radius_km} onChange={e => setUser({...user, service_radius_km: parseInt(e.target.value) || 0})} placeholder="Service Radius (KM)" className="field-input text-xs" tabIndex={tab === 'signup' ? 0 : -1} />
+                    <input type="number" value={user.total_fleet_size} onChange={e => setUser({...user, total_fleet_size: parseInt(e.target.value) || 0})} placeholder="Fleet Size" className="field-input text-xs" tabIndex={tab === 'signup' ? 0 : -1} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <select value={user.primary_equipment_type} onChange={e => setUser({...user, primary_equipment_type: e.target.value})} className="field-input text-xs" tabIndex={tab === 'signup' ? 0 : -1}>
+                      <option value="Tractors">Tractors</option>
+                      <option value="Harvesters">Harvesters</option>
+                      <option value="Drone Sprayers">Drone Sprayers</option>
+                      <option value="Implements">Implements</option>
+                    </select>
+                    <input type="text" value={user.upi_id} onChange={e => setUser({...user, upi_id: e.target.value})} placeholder="UPI ID for Payouts" className="field-input text-xs" tabIndex={tab === 'signup' ? 0 : -1} />
+                  </div>
                 </div>
               </div>
             </div>
@@ -500,11 +574,11 @@ function LoginContent() {
               </Link>
             </div>
 
-            {/* Login button */}
+            {/* Login / Signup button */}
             <button type="submit" disabled={loading} className="login-btn mt-1">
               {loading
-                ? <><Loader2 className="w-4 h-4 animate-spin" /><span>Signing In…</span></>
-                : <span>Login</span>
+                ? <><Loader2 className="w-4 h-4 animate-spin" /><span>{tab === 'signin' ? "Signing In…" : "Creating Account…"}</span></>
+                : <span>{tab === 'signin' ? "Login" : "Sign Up & Join"}</span>
               }
             </button>
 

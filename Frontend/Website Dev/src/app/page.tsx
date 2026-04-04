@@ -2,21 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { UserCheck, Tractor, ArrowRight, ShieldCheck, Database, Sun, Moon, Sparkles, Leaf } from "lucide-react";
-
-/**
- * AGRISENSE V2.0 - Premium Landing Page
- * ─────────────────────────────────────────────────────────────────────────────
- * Palette: 
- * - Mint Cream (#F1FAF6)
- * - Deep Forest-Charcoal (#1F382E)
- * - Spring Green (#28D18C)
- * - Hunter Green (#4C7B65)
- */
+import { 
+  Database, Tractor, Play, Leaf, Map,
+  ChevronDown, Hexagon, Star, Droplet, Sprout, ArrowRight, ScanLine
+} from "lucide-react";
 
 export default function LandingPage() {
-  const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [hoveredSide, setHoveredSide] = useState<'left' | 'right' | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -25,191 +18,166 @@ export default function LandingPage() {
   if (!mounted) return null;
 
   return (
-    <div className={`min-h-screen relative overflow-hidden font-['Poppins',sans-serif] transition-colors duration-700 
-      ${isDark ? "bg-[#0b1410] text-[#E6F5EC]" : "bg-[#F1FAF6] text-[#1F382E]"}`}>
-
-      {/* ── DYNAMIC SVG BACKGROUND PATTERN ── */}
-      <div className="absolute inset-0 opacity-[0.15] pointer-events-none" 
-        style={{ 
-          backgroundImage: `url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNTAiIGhlaWdodD0iNzUiIHZpZXdCb3g9IjAgMCAxNTAgNzUiPiA8ZyBmaWxsPSJub25lIiBzdHJva2U9IiMyOEQxOEMyOCIgc3Ryb2tlLXdpZHRoPSIwLjciPiA8cGF0aCBkPSJNLTAuNSwzMS41IEMtMC41LDMxLjUgNzQsMTQgMTUwLDM0LjUiIC8+IDxwYXRoIGQ9Ik0tMC41LDY5LjUgQy0wLjUsNjkuNSAzOC4yLDYwIDEwNC43LDU4LjIiIC8+IDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDUwLDYwKSBzY2FsZSgwLjI1KSI+PHBhdGggZD0iTTUwLDEwIEM1MCw1MCAxMDAsNTAgMTAwLDEwIE0xMDAsMTAgQzEwMCwtMzAgNTAsLTMwIDUwLDEwIi8+PC9nPjwvZz48L3N2Zz4=")`,
-          backgroundSize: '300px 150px'
-        }} 
-      />
-
-      {/* ── FLOATING PARTICLES (Dynamism) ── */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} 
-            className="absolute animate-float opacity-20"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${i * 1.5}s`,
-              animationDuration: `${10 + Math.random() * 10}s`
-            }}
-          >
-            <Leaf className={`text-[#28D18C] w-${4 + (i%4)} h-${4 + (i%4)}`} />
-          </div>
-        ))}
+    <div className="min-h-screen relative overflow-hidden font-['Poppins',sans-serif] text-[#1a231f]">
+      
+      {/* BACKGROUND SPLIT */}
+      <div className="absolute inset-0 flex z-[0]">
+        {/* Left Side Mint to deeper green bottom */}
+        <div className="w-1/2 relative overflow-hidden bg-gradient-to-b from-[#cae9e3] via-[#bae1da] to-[#85d8be]">
+            {/* Vibrant Green glow behind the button area */}
+            <div className="absolute bottom-[20%] left-[80%] w-[800px] h-[800px] bg-[#53f0b2]/50 rounded-full blur-[120px] transform -translate-x-1/2 translate-y-1/4"></div>
+        </div>
+        {/* Right Side Warm Peach to muted beige */}
+        <div className="w-1/2 relative overflow-hidden bg-gradient-to-b from-[#fae0cb] via-[#ebd2c0] to-[#d8c7ba]">
+            {/* Subtle warm glow at bottom */}
+            <div className="absolute bottom-[20%] right-[80%] w-[700px] h-[700px] bg-[#faebd7]/60 rounded-full blur-[100px] transform translate-x-1/2 translate-y-1/4"></div>
+        </div>
       </div>
 
-      <div className="container mx-auto px-6 py-8 relative z-10 flex flex-col min-h-screen">
+      {/* HERO SPLIT IMAGE */}
+      <div className="absolute inset-0 flex justify-center pointer-events-none z-[1]">
+        <img 
+          src="/split_hero_perfect.png" 
+          alt="Split Hero" 
+          className="h-[105%] w-auto object-cover max-w-none opacity-95 transition-all duration-1000 mix-blend-multiply" 
+          style={{ 
+            objectPosition: '50% 50%', 
+            minWidth: '1000px',
+            WebkitMaskImage: 'radial-gradient(ellipse at 50% 40%, black 35%, transparent 75%)',
+            maskImage: 'radial-gradient(ellipse at 50% 40%, black 35%, transparent 75%)'
+          }}
+        />
+        {/* Midline precise split line */}
+        <div className="absolute inset-y-0 left-1/2 w-[2px] bg-gradient-to-b from-transparent via-white/50 to-transparent transform -translate-x-1/2 z-[2]"></div>
+      </div>
+
+      {/* DYNAMIC SCENE LIGHTING OVERLAYS */}
+      {/* Dims the right side when left is hovered */}
+      <div className={`absolute inset-0 left-1/2 w-1/2 bg-black/40 backdrop-blur-[4px] transition-all duration-700 pointer-events-none z-[3] ${hoveredSide === 'left' ? 'opacity-100' : 'opacity-0'}`}></div>
+      {/* Dims the left side when right is hovered */}
+      <div className={`absolute inset-0 w-1/2 bg-black/40 backdrop-blur-[4px] transition-all duration-700 pointer-events-none z-[3] ${hoveredSide === 'right' ? 'opacity-100' : 'opacity-0'}`}></div>
+
+
+      {/* OVERLAY / FOREGROUND UI */}
+      <div className="relative z-10 flex flex-col h-screen max-w-[1600px] mx-auto px-8 xl:px-16 pt-8 pb-0">
         
-        {/* ── HEADER ── */}
-        <header className="flex justify-between items-center mb-16 animate-in slide-in-from-top duration-700">
-          <div className="flex items-center gap-4">
-            <div className="grid grid-cols-2 gap-1 bg-[#E6F5EC] p-2 rounded-xl shadow-sm border border-[#28D18C20]">
-              <div className="w-2.5 h-2.5 rounded-sm bg-[#28D18C]" />
-              <div className="w-2.5 h-2.5 rounded-sm bg-[#B2EFD2]" />
-              <div className="w-2.5 h-2.5 rounded-sm bg-[#28D18C]" />
-              <div className="w-2.5 h-2.5 rounded-sm bg-[#B2EFD2]" />
+        {/* TOP NAVBAR */}
+        <nav className="flex justify-between items-center mb-auto animate-in slide-in-from-top duration-700 relative z-40">
+          {/* Logo */}
+          <div className="flex items-center gap-4 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full shadow-sm border border-white/50">
+            <div className="w-14 h-14 flex items-center justify-center overflow-hidden shrink-0">
+               <img src="/agrisense_logo.png" alt="AgriSense Logo" className="w-full h-full object-contain scale-125 hover:scale-110 transition-transform cursor-pointer" />
             </div>
-            <span className="text-lg font-bold tracking-tight uppercase">AgriSense V2.0</span>
+            <span className="text-3xl font-black tracking-tighter text-[#1a231f]">AgriSense<span className="text-green-600 drop-shadow-sm">°</span></span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border shadow-sm
-              ${isDark ? "bg-[#1F382E] border-[#28D18C40] text-white" : "bg-[#2A3C32] border-white text-white"}`}>
-              N
+          {/* Nav Links */}
+          <div className="hidden md:flex items-center gap-10 font-semibold text-sm text-[#1a231f] bg-white/90 backdrop-blur-md px-8 py-3.5 rounded-full shadow-sm border border-white/50">
+            <div className="flex items-center gap-1 cursor-pointer hover:text-green-700 transition-colors">Portals <ChevronDown className="w-4 h-4" /></div>
+            <div className="cursor-pointer hover:text-green-700 transition-colors">Help</div>
+            <div className="flex items-center gap-1 cursor-pointer hover:text-green-700 transition-colors">Pricing <ChevronDown className="w-4 h-4" /></div>
+            <div className="cursor-pointer hover:text-green-700 transition-colors">Partners</div>
+          </div>
+
+          {/* CTA Button */}
+          <Link href="/login" className="px-6 py-3 bg-white/90 rounded-full border border-white/50 font-semibold flex items-center gap-2 hover:bg-white hover:scale-105 backdrop-blur-md transition-all shadow-md">
+            Get the App <Play className="w-4 h-4 fill-[#1a231f]" />
+          </Link>
+        </nav>
+
+        {/* HERO CONTENT */}
+        <div className="relative flex-1 w-full mt-12 flex">
+          
+          {/* LEFT SIDE (Inspector UI) */}
+          <div 
+             className={`w-1/2 relative h-full transition-transform duration-700 ${hoveredSide === 'left' ? 'scale-[1.02] z-30' : 'z-20'}`}
+             onMouseEnter={() => setHoveredSide('left')}
+             onMouseLeave={() => setHoveredSide(null)}
+          >
+             {/* Hitbox */}
+             <div className="absolute inset-0 cursor-default" />
+             
+             {/* HUGE TEXT BLOCK */}
+            <div className="absolute left-0 top-[8%] z-20 pointer-events-none min-w-[600px] hidden lg:hidden">
+              <div className="flex gap-2 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-8 h-8 fill-[#FFD700] text-[#FFD700] drop-shadow-md" />
+                ))}
+              </div>
+              <h1 className="text-[5.5rem] leading-[0.95] font-black text-white drop-shadow-2xl tracking-tighter"
+                  style={{ WebkitTextStroke: '1.5px rgba(26, 35, 31, 0.1)' }}>
+                The New <br />
+                Level of Care <br />
+                for Your <br />
+                Harvest.
+              </h1>
+            </div>
+
+            {/* Top Left Badge */}
+            <div className="absolute top-[8%] right-[10%] bg-white/70 backdrop-blur-md px-5 py-3 rounded-full border border-white/50 shadow-xl flex items-center gap-3 transform -rotate-1 animate-in fade-in duration-1000 delay-300">
+               <Leaf className="w-5 h-5 text-green-700" />
+               <span className="text-sm font-bold text-gray-800">Tough Pathogens? We'll spot them instantly!</span>
+            </div>
+
+            {/* Drone/Scan Icon */}
+            <div className="absolute top-[35%] right-[25%] w-16 h-16 bg-white/80 backdrop-blur-md border border-white/60 rounded-full flex items-center justify-center shadow-xl transform rotate-12 hover:scale-110 transition-transform cursor-pointer">
+               <ScanLine className="w-7 h-7 text-gray-800" />
+            </div>
+
+            {/* Map Icon Box */}
+            <div className="absolute top-[60%] left-[8%] w-16 h-16 pointer-events-auto cursor-pointer hover:scale-110 transition-transform bg-gradient-to-tr from-green-500 to-emerald-300 rounded-3xl flex items-center justify-center shadow-[0_20px_40px_rgba(40,209,140,0.4)] skew-y-3">
+               <Map className="w-8 h-8 text-white" />
+            </div>
+
+            {/* BUTTON / Inspector CTA */}
+            <div className="absolute bottom-[20%] right-[10%] pointer-events-auto z-30">
+               <Link href="/login?role=inspector" className="group flex items-center gap-3 bg-white/95 hover:bg-white text-green-600 px-6 py-4 rounded-3xl shadow-[0_0_40px_rgba(40,209,140,0.5)] transition-all hover:scale-[1.03] border border-green-200">
+                  <div className="bg-green-100 p-2 rounded-xl">
+                    <Database className="w-6 h-6 text-green-700" />
+                  </div>
+                  <span className="font-extrabold tracking-widest text-green-700 uppercase text-sm">Analyze Fields <ArrowRight className="inline w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" /></span>
+               </Link>
             </div>
           </div>
-        </header>
 
-        {/* ── HERO SECTION ── */}
-        <main className="flex-1 flex flex-col items-center justify-center text-center">
-          <div className="max-w-4xl mx-auto mb-20 animate-in fade-in zoom-in duration-1000">
-             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 bg-[#28D18C15] border border-[#28D18C25]">
-               <Sparkles className="w-4 h-4 text-[#28D18C]" />
-               <span className="text-xs font-black text-[#28D18C] uppercase tracking-widest">Next-Gen Surveillance</span>
-             </div>
-             
-             <h1 className={`text-6xl md:text-8xl font-black mb-8 tracking-tighter leading-[0.9] 
-               ${isDark ? "text-white" : "text-[#1F382E]"}`}>
-               The Future of <br /> 
-               <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#28D18C] to-[#1FAF7A] animate-gradient-x">
-                 Agriculture.
-               </span>
-             </h1>
-             
-             <p className={`text-lg md:text-xl max-w-2xl mx-auto font-medium leading-relaxed opacity-80
-               ${isDark ? "text-[#E6F5EC]" : "text-[#4C7B65]"}`}>
-               Choose your portal to access specialized tools for field inspection 
-               or high-performance machinery rental.
-             </p>
+          {/* RIGHT SIDE (Farmer UI) */}
+          <div 
+             className={`w-1/2 relative h-full hidden lg:block transition-transform duration-700 ${hoveredSide === 'right' ? 'scale-[1.02] z-30' : 'z-20'}`}
+             onMouseEnter={() => setHoveredSide('right')}
+             onMouseLeave={() => setHoveredSide(null)}
+          >
+             {/* Hitbox */}
+             <div className="absolute inset-0 cursor-default" />
+            
+            {/* Top Right Mini Icons */}
+            <div className="absolute top-[18%] left-[10%] w-12 h-12 bg-white/60 backdrop-blur border border-white/40 rounded-full flex items-center justify-center shadow-lg">
+               <Hexagon className="w-5 h-5 text-orange-600" />
+            </div>
+            
+            {/* Right Badge */}
+            <div className="absolute top-[40%] right-[15%] bg-[#efdcd0]/80 backdrop-blur-md px-5 py-3 rounded-full border border-white/50 shadow-xl flex items-center gap-3 transform rotate-2 animate-in fade-in duration-1000 delay-500">
+               <span className="text-sm font-bold text-gray-800">We'll Handle Any Terrain — Guaranteed</span>
+               <Sprout className="w-5 h-5 text-[#885a3a]" />
+            </div>
+
+            <div className="absolute top-[60%] right-[32%] w-12 h-12 bg-white/50 backdrop-blur border border-white/50 rounded-full flex items-center justify-center shadow-md">
+               <Droplet className="w-5 h-5 text-gray-700" />
+            </div>
+
+             {/* BUTTON / Farmer CTA */}
+            <div className="absolute bottom-[20%] left-[8%] pointer-events-auto z-30">
+               <Link href="/login?role=farmer" className="group flex items-center gap-3 bg-white/60 hover:bg-white text-orange-800 border-2 border-white/50 backdrop-blur-md px-6 py-4 rounded-3xl transition-all hover:scale-[1.03] shadow-[0_0_30px_rgba(255,255,255,0.3)] hover:shadow-[0_0_40px_rgba(255,255,255,0.8)]">
+                  <div className="bg-orange-100 p-2 rounded-xl group-hover:bg-orange-200 transition-colors">
+                    <Tractor className="w-6 h-6 text-orange-700" />
+                  </div>
+                  <span className="font-extrabold tracking-widest text-orange-900 uppercase text-sm">Manage Fleet <ArrowRight className="inline w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" /></span>
+               </Link>
+            </div>
           </div>
-
-          {/* ── PORTAL CARDS ── */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-5xl px-4 pb-20">
-            {/* Card 1: Official Inspector */}
-            <Link 
-              href="/login?role=inspector"
-              className={`group relative p-8 rounded-[38px] transition-all duration-700 border hover:scale-[1.03] hover:-translate-y-2
-                ${isDark 
-                  ? "bg-[#16251f]/80 border-[#28D18C20] shadow-[0_20px_50px_rgba(0,0,0,0.5)]" 
-                  : "bg-white border-white shadow-[0_25px_60px_rgba(40,209,140,0.08)] hover:shadow-[0_45px_100px_rgba(40,209,140,0.15)]"
-                }`}
-            >
-              <div className="absolute top-6 right-8 opacity-[0.05] group-hover:opacity-10 transition-opacity">
-                <Database size={120} strokeWidth={1} />
-              </div>
-
-              <div className="flex flex-col h-full gap-6">
-                <div className="w-14 h-14 rounded-2xl bg-[#E6F5EC] flex items-center justify-center p-3 group-hover:rotate-12 transition-transform duration-500">
-                  <UserCheck className="text-[#28D18C] w-full h-full" />
-                </div>
-                
-                <div className="text-left">
-                  <h2 className="text-3xl font-extrabold mb-3 tracking-tight">Official Inspector</h2>
-                  <p className="opacity-70 font-medium leading-relaxed">
-                    Diagnose pathogens, monitor heatmaps, and analyze national crop health metrics in real-time.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 text-[#28D18C] font-black uppercase text-sm tracking-widest mt-auto group-hover:gap-4 transition-all">
-                  Analyze Fields <ArrowRight className="w-5 h-5" />
-                </div>
-              </div>
-            </Link>
-
-            {/* Card 2: Rental Farmer */}
-            <Link 
-              href="/login?role=farmer"
-              className={`group relative p-8 rounded-[38px] transition-all duration-700 border hover:scale-[1.03] hover:-translate-y-2
-                ${isDark 
-                  ? "bg-[#16251f]/80 border-[#28D18C20] shadow-[0_20px_50px_rgba(0,0,0,0.5)]" 
-                  : "bg-white border-white shadow-[0_25px_60px_rgba(40,209,140,0.08)] hover:shadow-[0_45px_100px_rgba(40,209,140,0.15)]"
-                }`}
-            >
-              <div className="absolute top-6 right-8 opacity-[0.05] group-hover:opacity-10 transition-opacity">
-                <Tractor size={120} strokeWidth={1} />
-              </div>
-
-              <div className="flex flex-col h-full gap-6">
-                <div className="w-14 h-14 rounded-2xl bg-[#E6F5EC] flex items-center justify-center p-3 group-hover:-rotate-12 transition-transform duration-500">
-                  <Tractor className="text-[#2A6B43] w-full h-full" />
-                </div>
-                
-                <div className="text-left">
-                  <h2 className="text-3xl font-extrabold mb-3 tracking-tight">Rental Farmer</h2>
-                  <p className="opacity-70 font-medium leading-relaxed">
-                    Rent machinery, track active sessions, and monitor your fleet’s telemetry via PostGIS tracking.
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-2 text-[#28D18C] font-black uppercase text-sm tracking-widest mt-auto group-hover:gap-4 transition-all">
-                  Manage Fleet <ArrowRight className="w-5 h-5" />
-                </div>
-              </div>
-            </Link>
-          </div>
-        </main>
-
-        {/* ── FOOTER ── */}
-        <footer className="py-10 border-t border-[#28D18C15] flex flex-col md:flex-row justify-center items-center gap-6 animate-in slide-in-from-bottom duration-700">
-          <div className="flex items-center gap-3">
-             <div className="bg-[#28D18C15] p-2 rounded-lg">
-               <ShieldCheck className="w-5 h-5 text-[#28D18C]" />
-             </div>
-             <p className="text-sm font-bold tracking-tight opacity-60">Enterprise Grade Security</p>
-          </div>
-          <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-[#28D18C40]" />
-          <p className="text-sm font-bold tracking-tight opacity-60">Build v2.1.0-Release</p>
-        </footer>
+        </div>
 
       </div>
-
-      {/* ── THEME TOGGLE ── */}
-      <button 
-        onClick={() => setIsDark(!isDark)}
-        className={`fixed bottom-8 right-8 w-14 h-14 rounded-full border-2 border-[#28D18C] flex items-center justify-center transition-all duration-300 z-[100] group
-          ${isDark ? "bg-[#1F382E] text-white hover:bg-[#2A3C32]" : "bg-white text-[#1F382E] hover:bg-[#F1FAF6] shadow-xl"}`}
-      >
-        {isDark ? <Sun className="w-6 h-6 animate-spin-slow" /> : <Moon className="w-6 h-6 animate-pulse" />}
-      </button>
-
-      {/* Custom Keyframe Animations */}
-      <style jsx global>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) rotate(0deg); }
-          33% { transform: translate(30px, -50px) rotate(120deg); }
-          66% { transform: translate(-20px, 20px) rotate(240deg); }
-        }
-        .animate-float {
-          animation: float linear infinite;
-        }
-        .animate-spin-slow {
-          animation: spin 8s linear infinite;
-        }
-        @keyframes gradient-x {
-          0%, 100% { background-size: 200% 200%; background-position: left center; }
-          50% { background-size: 200% 200%; background-position: right center; }
-        }
-        .animate-gradient-x {
-          animation: gradient-x 5s ease infinite;
-        }
-      `}</style>
+      
     </div>
   );
 }
-
-

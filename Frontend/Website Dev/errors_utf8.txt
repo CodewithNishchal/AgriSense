@@ -1,0 +1,7 @@
+src/app/users/inspectionDashboard/page.tsx(157,61): error TS2322: Type '{ type: string; features: ({ type: string; geometry: { type: string; coordinates: number[]; }; properties: { intensity: number; id: string; }; } | { type: string; geometry: { type: string; coordinates: number[]; }; properties: { ...; }; })[]; }' is not assignable to type 'string | GeoJSON<Geometry, GeoJsonProperties>'.
+  Type '{ type: string; features: ({ type: string; geometry: { type: string; coordinates: number[]; }; properties: { intensity: number; id: string; }; } | { type: string; geometry: { type: string; coordinates: number[]; }; properties: { ...; }; })[]; }' is not assignable to type 'Point | MultiPoint | LineString | MultiLineString | Polygon | MultiPolygon | GeometryCollection<Geometry> | Feature<...> | FeatureCollection<...>'.
+    Type '{ type: string; features: ({ type: string; geometry: { type: string; coordinates: number[]; }; properties: { intensity: number; id: string; }; } | { type: string; geometry: { type: string; coordinates: number[]; }; properties: { ...; }; })[]; }' is not assignable to type 'FeatureCollection<Geometry, GeoJsonProperties>'.
+      Types of property 'type' are incompatible.
+        Type 'string' is not assignable to type '"FeatureCollection"'.
+src/app/users/inspectionDashboard/page.tsx(241,34): error TS2304: Cannot find name 'Search'.
+src/app/users/inspectionDashboard/page.tsx(268,34): error TS2304: Cannot find name 'Bug'.

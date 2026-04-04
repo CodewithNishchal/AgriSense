@@ -1,29 +1,25 @@
-import { Pool } from 'pg';
+import mongoose from "mongoose";
 
-/**
- * Direct Postgres Connection Pool
- * This uses your DATABASE_URL for raw SQL queries.
- */
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-});
-
-// For testing the connection
-export const testConnection = async () => {
+export async function connect() 
+{
     try {
-        const client = await pool.connect();
-        const res = await client.query('SELECT NOW()');
-        client.release();
-        console.log("✅ Successfully connected to Postgres:", res.rows[0].now);
-        return true;
-    } catch (err) {
-        if (err instanceof Error) {
-            console.error("❌ Postgres connection error:", err.message);
-        } else {
-            console.error("❌ Postgres connection error:", err);
-        }
-        return false;
-    }
-};
+        mongoose.connect(process.env.MONGO_URL!); // yha exclaimation mark is used to tell typescript
+        // that this variable is surely avaialble and not undefined
 
-export default pool;
+        const connection = mongoose.connection;
+
+        connection.on('connected', () => {
+            console.log("mongoDB connected successfully")
+        })
+        
+        connection.on('error', (err) => {
+            console.log("mongoDB connection failed")
+            console.log(err)
+
+            process.exit();
+        })
+    } catch (error) {
+        console.log("Error connecting to database");
+        console.log(error);
+    }
+}

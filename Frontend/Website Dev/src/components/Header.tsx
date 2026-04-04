@@ -44,7 +44,7 @@ export default function Header({ title = "AgriSense Marketplace Fleet" }: Header
   return (
     <header className="flex items-center justify-between bg-white/50 dark:bg-[#1e293b]/50 p-2 rounded-full backdrop-blur-md transition-colors shrink-0 z-50">
       <div className="flex items-center gap-4 pl-4">
-        <h1 className="text-2xl font-extrabold text-black dark:text-white tracking-tight">{title}</h1>
+        <h1 className="text-[24px] font-black text-black dark:text-white tracking-tighter">{title}</h1>
         <div className="ml-2 px-3 py-1 bg-white dark:bg-[#1e293b] border border-gray-100 dark:border-gray-800 rounded-full text-[13px] font-bold text-gray-600 dark:text-gray-300 flex items-center gap-1.5 cursor-pointer shadow-sm hover:border-green-200 transition-colors">
           North Fields <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" /></svg>
         </div>
