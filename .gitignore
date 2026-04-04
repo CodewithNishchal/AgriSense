@@ -55,13 +55,7 @@ pnpm-debug.log*
 Thumbs.db
 .vscode/
 
-# -----------------------------
-# Project data / model outputs
-# -----------------------------
-*.pth
-*.pt
-*.onnx
-*.ckpt
+# 
 
 # Sample image files used in local tests
 leaf.jpg
