@@ -64,7 +64,7 @@ class _DiseaseMapScreenState extends State<DiseaseMapScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Demo heat + KPIs · wire to /api/scans/heatmap & /api/charts.',
+              'Heatmap and KPIs — connect to your analytics API when ready.',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -75,7 +75,7 @@ class _DiseaseMapScreenState extends State<DiseaseMapScreen> {
             const SizedBox(height: 10),
             DropdownButtonFormField<String>(
               isDense: true,
-              initialValue: _district,
+              value: _district,
               decoration: const InputDecoration(
                 labelText: 'District / region',
                 filled: true,
@@ -109,7 +109,7 @@ class _DiseaseMapScreenState extends State<DiseaseMapScreen> {
                   children: [
                     TileLayer(
                       urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.hacksagon.agrinxt',
+                      userAgentPackageName: 'com.agrises.app',
                     ),
                     CircleLayer(circles: circleMarkers),
                   ],
@@ -131,7 +131,7 @@ class _DiseaseMapScreenState extends State<DiseaseMapScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Diagnostics vs atmospheric model (mock)',
+              'Diagnostics vs atmospheric model',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),

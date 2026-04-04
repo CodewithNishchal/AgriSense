@@ -11,7 +11,7 @@ import '../../core/theme/editorial_asset_urls.dart';
 import '../../core/theme/editorial_gradients.dart';
 import '../../core/widgets/editorial_screen_background.dart';
 
-/// Login — “Digital Greenhouse” glass card layout (matches HTML reference).
+/// Login — AgriSense glass card layout.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -20,13 +20,13 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  /// Demo-only — replace with API auth.
-  static const String _demoEmail = 'test@gmail.com';
-  static const String _demoPassword = '123456';
+  /// Built-in test account until API auth ships.
+  static const String _quickSignInEmail = 'test@gmail.com';
+  static const String _quickSignInPassword = '123456';
 
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController(text: _demoEmail);
-  final _passwordController = TextEditingController(text: _demoPassword);
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   UserRole _role = UserRole.farmer;
 
@@ -50,9 +50,9 @@ class _LoginScreenState extends State<LoginScreen> {
     context.go('/');
   }
 
-  void _applyDemoCredentialsAndSubmit() {
-    _emailController.text = _demoEmail;
-    _passwordController.text = _demoPassword;
+  void _applyQuickSignIn() {
+    _emailController.text = _quickSignInEmail;
+    _passwordController.text = _quickSignInPassword;
     _submit();
   }
 
@@ -60,12 +60,14 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-    if (email == _demoEmail && password == _demoPassword) {
+    if (email == _quickSignInEmail && password == _quickSignInPassword) {
       await _enterApp();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Invalid email or password. Use the demo account.'),
+          content: Text(
+            'Invalid email or password. Use Google or Apple for quick sign-in, or sign up.',
+          ),
         ),
       );
     }
@@ -161,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               _submit();
                                             },
                                             onSocialSignIn:
-                                                _applyDemoCredentialsAndSubmit,
+                                                _applyQuickSignIn,
                                             googleIconUrl: _googleIconUrl,
                                             appleIconUrl: _appleIconUrl,
                                             wide: true,
@@ -186,7 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       _submit();
                                     },
                                     onSocialSignIn:
-                                        _applyDemoCredentialsAndSubmit,
+                                        _applyQuickSignIn,
                                     googleIconUrl: _googleIconUrl,
                                     appleIconUrl: _appleIconUrl,
                                     wide: false,
@@ -264,7 +266,7 @@ class _MobileBrandTop extends StatelessWidget {
               Icon(Icons.spa_rounded, size: 28, color: AppColors.primary),
               const SizedBox(width: 8),
               Text(
-                'agriNXT',
+                'AgriSense',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w900,
                       letterSpacing: 4,
@@ -334,7 +336,7 @@ class _LoginHeroPanel extends StatelessWidget {
                     Icon(Icons.eco_rounded, size: 32, color: AppColors.primary),
                     const SizedBox(width: 8),
                     Text(
-                      'agriNXT',
+                      'AgriSense',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w900,
                             letterSpacing: 3,
@@ -500,7 +502,7 @@ class _LoginFormPanel extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge,
               decoration: _authInputDecoration(
                 context,
-                hintText: _LoginScreenState._demoEmail,
+                hintText: _LoginScreenState._quickSignInEmail,
                 prefixIcon: Icons.mail_outline_rounded,
               ),
               validator: (v) {
@@ -537,7 +539,7 @@ class _LoginFormPanel extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge,
               decoration: _authInputDecoration(
                 context,
-                hintText: _LoginScreenState._demoPassword,
+                hintText: _LoginScreenState._quickSignInPassword,
                 prefixIcon: Icons.lock_outline_rounded,
                 suffixIcon: IconButton(
                   icon: Icon(

@@ -1,18 +1,20 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 
 import 'app_config.dart';
+import 'crop_disease_api_service.dart';
+import 'dio_debug_logging.dart';
 
-/// Calls [crop-disease-prediction] FastAPI `POST /disease/diagnose`.
+/// Calls [crop-disease-prediction] FastAPI `POST /api/v1/predict`.
 /// On failure or when [kUseMockData] is true, returns null so UI can use mock.
 class DiseaseDiagnosisService {
-  DiseaseDiagnosisService({Dio? dio}) : _dio = dio ?? Dio();
+  DiseaseDiagnosisService({Dio? dio}) : _dio = dio ?? createCropDiseaseDio() {
+    attachDebugNetworkLogging(_dio);
+  }
 
   final Dio _dio;
 
-  /// Demo payload matching the notebook / FastAPI intelligence report shape.
-  static Map<String, dynamic> demoReportPayload({double? lat, double? lon}) {
+  /// Sample payload matching the notebook / FastAPI intelligence report shape.
+  static Map<String, dynamic> sampleReportPayload({double? lat, double? lon}) {
     final ts = DateTime.now().toUtc().toIso8601String();
     return <String, dynamic>{
       'disease': 'Healthy Tomato',
@@ -82,30 +84,16 @@ class DiseaseDiagnosisService {
   }) async {
     if (kUseMockData) return null;
 
-    final file = File(imagePath);
-    if (!await file.exists()) return null;
-
-    final form = FormData.fromMap({
-      'file': await MultipartFile.fromFile(imagePath, filename: 'leaf.jpg'),
-      'crop_area_acres': cropAreaAcres.toString(),
-      'market_price_rs_per_quintal': marketPriceRsPerQuintal.toString(),
-      'top_k': topK.toString(),
-      if (lat != null) 'lat': lat.toString(),
-      if (lon != null) 'lon': lon.toString(),
-      if (voiceTranscript != null && voiceTranscript.isNotEmpty)
-        'voice_transcript': voiceTranscript,
-    });
-
     try {
-      final response = await _dio.post<Map<String, dynamic>>(
-        '$kBaseUrl/disease/diagnose',
-        data: form,
-        options: Options(
-          sendTimeout: const Duration(seconds: 60),
-          receiveTimeout: const Duration(seconds: 60),
-        ),
+      return await CropDiseaseApiService(dio: _dio).predictLeaf(
+        imagePath: imagePath,
+        textInput: voiceTranscript,
+        locationLat: lat,
+        locationLon: lon,
+        cropAreaAcres: cropAreaAcres,
+        marketPriceRsPerQuintal: marketPriceRsPerQuintal,
+        topK: topK,
       );
-      return response.data;
     } on DioException catch (_) {
       return null;
     } catch (_) {

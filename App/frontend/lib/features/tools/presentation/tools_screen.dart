@@ -52,15 +52,21 @@ class ToolsScreen extends StatelessWidget {
       route: '/voice',
     ),
     _ToolDef(
+      icon: Icons.biotech_rounded,
+      title: 'API lab',
+      subtitle: 'Image, STT, predict, Gemini',
+      route: '/ml-lab',
+    ),
+    _ToolDef(
       icon: Icons.sensors_rounded,
       title: 'IoT dashboard',
-      subtitle: 'Soil sensors (mock)',
+      subtitle: 'Soil sensor readouts',
       route: '/iot',
     ),
     _ToolDef(
       icon: Icons.satellite_alt_rounded,
       title: 'Satellite view',
-      subtitle: 'NDVI / stress (mock)',
+      subtitle: 'NDVI / stress preview',
       route: '/satellite',
     ),
   ];

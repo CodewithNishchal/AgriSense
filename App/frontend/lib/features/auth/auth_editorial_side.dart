@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/editorial_asset_urls.dart';
 
-/// Left column: hero image, agriNXT branding, glass stat cards (matches HTML reference).
+/// Left column: hero image, AgriSense branding, glass stat cards.
 class AuthEditorialSide extends StatelessWidget {
   const AuthEditorialSide({super.key});
 
@@ -60,7 +60,7 @@ class AuthEditorialSide extends StatelessWidget {
                   Icon(Icons.spa_rounded, size: 48, color: AppColors.primary),
                   const SizedBox(width: 12),
                   Text(
-                    'agriNXT',
+                    'AgriSense',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w900,
                           letterSpacing: 4,

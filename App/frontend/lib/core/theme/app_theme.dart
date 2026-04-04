@@ -32,6 +32,8 @@ class AppTheme {
       onError: Colors.white,
       outline: AppColors.outlineVariant.withValues(alpha: 0.2),
       outlineVariant: AppColors.outlineVariant.withValues(alpha: 0.2),
+      background: AppColors.background,
+      onBackground: AppColors.onBackground,
     );
 
     final textTheme = _buildTextTheme();

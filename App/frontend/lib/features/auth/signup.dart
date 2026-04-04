@@ -20,10 +20,9 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController(text: 'Demo Farmer');
-  final _emailController =
-      TextEditingController(text: 'demo@agrinxt.app');
-  final _passwordController = TextEditingController(text: 'Demo123!');
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   UserRole _role = UserRole.farmer;
 
@@ -154,7 +153,7 @@ class _SignupFormColumn extends StatelessWidget {
                   Icon(Icons.spa_rounded, size: 32, color: AppColors.primary),
                   const SizedBox(width: 8),
                   Text(
-                    'agriNXT',
+                    'AgriSense',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w900,
                           letterSpacing: 4,
@@ -220,7 +219,7 @@ class _SignupFormColumn extends StatelessWidget {
               label: 'Full Name',
               icon: Icons.person_outline_rounded,
               controller: nameController,
-              hint: 'Demo Farmer',
+              hint: 'Full name',
               validator: (v) =>
                   (v == null || v.trim().isEmpty) ? 'Enter your name' : null,
             ),
@@ -229,7 +228,7 @@ class _SignupFormColumn extends StatelessWidget {
               label: 'Email Address',
               icon: Icons.mail_outline_rounded,
               controller: emailController,
-              hint: 'demo@agrinxt.app',
+              hint: 'you@example.com',
               keyboardType: TextInputType.emailAddress,
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Enter email';
@@ -250,7 +249,7 @@ class _SignupFormColumn extends StatelessWidget {
               obscureText: obscurePassword,
               style: Theme.of(context).textTheme.bodyLarge,
               decoration: InputDecoration(
-                hintText: 'Demo123!',
+                hintText: '8+ characters',
                 hintStyle: TextStyle(color: AppColors.outlineVariant),
                 filled: true,
                 fillColor: AppColors.surfaceContainerLowest,

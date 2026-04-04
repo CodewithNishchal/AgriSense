@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:latlong2/latlong.dart';
 
-/// Synthetic heatmap + chart points for demo (replace with /api/scans/heatmap).
+/// Synthetic heatmap + chart points for preview (replace with /api/scans/heatmap).
 class MockDiseaseMapData {
   MockDiseaseMapData._();
 
@@ -53,7 +53,7 @@ class MockDiseaseMapData {
     return out;
   }
 
-  /// KPI values (mock).
+  /// KPI values (synthetic).
   static Map<String, String> kpis(String district) {
     final m = district.hashCode.abs() % 97;
     return {

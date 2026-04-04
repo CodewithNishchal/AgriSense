@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/router/app_router.dart';
 import 'core/session/user_prefs.dart';
@@ -7,17 +8,18 @@ import 'core/widgets/editorial_screen_background.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: 'assets/.env', isOptional: true);
   await UserPrefs.instance.init();
-  runApp(const HacksagonApp());
+  runApp(const AgriSenseApp());
 }
 
-class HacksagonApp extends StatelessWidget {
-  const HacksagonApp({super.key});
+class AgriSenseApp extends StatelessWidget {
+  const AgriSenseApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Hacksagon',
+      title: 'AgriSense',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.editorial,
       builder: (context, child) {

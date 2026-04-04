@@ -87,7 +87,7 @@ class _FleetDashboardScreenState extends State<FleetDashboardScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Demo KPIs · API polling replaces this ticker when live.',
+              'Fleet KPIs — connect live data when your backend is ready.',
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -130,7 +130,7 @@ class _FleetDashboardScreenState extends State<FleetDashboardScreen> {
                     TileLayer(
                       urlTemplate:
                           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.hacksagon.agrinxt',
+                      userAgentPackageName: 'com.agrises.app',
                     ),
                     MarkerLayer(markers: markers),
                   ],

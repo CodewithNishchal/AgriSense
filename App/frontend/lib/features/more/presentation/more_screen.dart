@@ -23,19 +23,40 @@ class MoreScreen extends StatelessWidget {
             icon: Icons.settings_rounded,
             title: 'Settings',
             subtitle: 'App preferences',
-            onTap: () {},
+            onTap: () => context.push('/info', extra: {
+                  'title': 'Settings',
+                  'icon': 'settings',
+                  'message':
+                      'Language, units, notifications, and account preferences will be available here soon.',
+                  'primaryRoute': '/',
+                  'primaryLabel': 'Back to home',
+                }),
           ),
           _MoreTile(
             icon: Icons.help_outline_rounded,
             title: 'Help & support',
             subtitle: 'FAQs, contact',
-            onTap: () {},
+            onTap: () => context.push('/info', extra: {
+                  'title': 'Help & support',
+                  'icon': 'help',
+                  'message':
+                      'In-app guides, chat support, and regional agronomy contacts are coming soon. Use Scan for disease help and Tools for calculators.',
+                  'primaryRoute': '/',
+                  'primaryLabel': 'Back to home',
+                }),
           ),
           _MoreTile(
             icon: Icons.info_outline_rounded,
             title: 'About',
             subtitle: 'Version, credits',
-            onTap: () {},
+            onTap: () => context.push('/info', extra: {
+                  'title': 'About AgriSense',
+                  'icon': 'info',
+                  'message':
+                      'AgriSense v1.0 — leaf disease scanning, server-backed intelligence when online, and on-device analysis when offline. Built for farmers and advisors.',
+                  'primaryRoute': '/',
+                  'primaryLabel': 'Back to home',
+                }),
           ),
         ],
       ),
