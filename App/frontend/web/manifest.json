@@ -1,6 +1,6 @@
 {
-    "name": "hacksagon",
-    "short_name": "hacksagon",
+    "name": "AgriSense",
+    "short_name": "AgriSense",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

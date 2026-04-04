@@ -23,9 +23,16 @@ class SatelliteScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'NDVI / crop stress (mock)',
+                  'NDVI / crop stress',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppColors.onSurface,
+                      ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Satellite imagery integration coming in a future update.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.onSurfaceVariant,
                       ),
                 ),
                 const SizedBox(height: 16),
@@ -58,7 +65,7 @@ class SatelliteScreen extends StatelessWidget {
                                 ),
                           ),
                           Text(
-                            'Static mock view',
+                            'Preview view',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: AppColors.onSurfaceMuted,
                                 ),

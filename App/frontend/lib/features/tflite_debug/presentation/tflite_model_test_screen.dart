@@ -38,7 +38,7 @@ class _TfliteModelTestScreenState extends State<TfliteModelTestScreen> {
     if (!mounted) return;
     final err = TFLiteHelper.instance.loadError;
     setState(() {
-      _modelStatus = err ?? 'Model asset loaded OK.';
+      _modelStatus = err == null ? 'Model asset loaded OK.' : err;
     });
     try {
       await IntelligenceReportBuilder.ensureLoaded();

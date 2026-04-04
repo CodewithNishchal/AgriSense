@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/editorial_gradients.dart';
 
-/// agriNXT landing — “Digital Greenhouse” (HTML reference layout).
+/// AgriSense splash — routes to login.
 /// Shows first, then navigates to [LoginScreen] after [autoNavigateDelay].
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -236,7 +236,7 @@ class _LogoBlock extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'agriNXT',
+              'AgriSense',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w900,
                     letterSpacing: 3.2,
@@ -246,7 +246,7 @@ class _LogoBlock extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              'DIGITAL GREENHOUSE',
+              'SMART CROP CARE',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontSize: 10,
                     fontWeight: FontWeight.w500,

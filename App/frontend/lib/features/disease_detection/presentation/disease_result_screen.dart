@@ -4,9 +4,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:record/record.dart';
 
+import '../../../core/debug/terminal_log.dart';
 import '../../../core/layout/app_breakpoints.dart';
 import '../../../core/location/location_helper.dart';
+import '../../../core/network/analyze_save_service.dart';
+import '../../../core/network/app_config.dart';
+import '../../../core/network/crop_disease_api_service.dart';
 import '../../../core/session/user_prefs.dart';
 import '../../../core/session/user_role.dart';
 import '../../../core/theme/app_colors.dart';
@@ -23,6 +30,7 @@ class DiseaseResultScreen extends StatelessWidget {
     this.remediationSteps,
     this.locationLabel,
     this.fullReport,
+    this.geminiQuestionPrefill,
   });
 
   final String diseaseName;
@@ -32,6 +40,9 @@ class DiseaseResultScreen extends StatelessWidget {
   final List<String>? remediationSteps;
   final String? locationLabel;
   final Map<String, dynamic>? fullReport;
+
+  /// Optional question prefill (e.g. from API lab transcript) for [GeminiAdvisorSection].
+  final String? geminiQuestionPrefill;
 
   String _confidenceDisplay() {
     final r = fullReport;
@@ -75,29 +86,117 @@ class DiseaseResultScreen extends StatelessWidget {
     return confidence.clamp(0.0, 1.0);
   }
 
+  void _logSendForAnalyzing(String message) {
+    logToTerminal('SendForAnalyzing', message);
+  }
+
   Future<void> _onSendForAnalyzing(BuildContext context) async {
+    final total = Stopwatch()..start();
+    _logSendForAnalyzing('start (tap)');
+
+    final swLoc = Stopwatch()..start();
     final pos = await LocationHelper.getCurrentPosition();
+    swLoc.stop();
+    _logSendForAnalyzing(
+      'getCurrentPosition: ${swLoc.elapsedMilliseconds}ms '
+      '(hasFix=${pos != null}) — often the slowest step (GPS)',
+    );
+
+    final swPayload = Stopwatch()..start();
     final payload = _buildAnalyzePayload(
       pos?.latitude,
       pos?.longitude,
     );
+    swPayload.stop();
+    _logSendForAnalyzing('build payload: ${swPayload.elapsedMilliseconds}ms');
+
+    final apiUrl = kAnalyzeSaveApiUrl.trim();
+    if (apiUrl.isNotEmpty) {
+      _logSendForAnalyzing('mode: POST to API (configured)');
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Saving scan…'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      try {
+        final swSave = Stopwatch()..start();
+        final result = await AnalyzeSaveService().save(payload);
+        swSave.stop();
+        _logSendForAnalyzing('save() returned: ${swSave.elapsedMilliseconds}ms');
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).clearSnackBars();
+        final msg = result.message ??
+            (result.scanId != null
+                ? 'Saved (id: ${result.scanId})'
+                : 'Scan saved');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(msg),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      } catch (e, st) {
+        _logSendForAnalyzing('save() threw: $e');
+        logErrorToTerminal('SendForAnalyzing', e, st);
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).clearSnackBars();
+        await _showAnalyzePayloadDialog(
+          context,
+          payload,
+          title: 'Could not save scan',
+          subtitle: e.toString(),
+        );
+      }
+      total.stop();
+      _logSendForAnalyzing('done total: ${total.elapsedMilliseconds}ms');
+      return;
+    }
+
+    _logSendForAnalyzing('mode: dialog only (ANALYZE_SAVE_API_URL empty)');
+    await _showAnalyzePayloadDialog(context, payload);
+    total.stop();
+    _logSendForAnalyzing('done total: ${total.elapsedMilliseconds}ms');
+  }
+
+  Future<void> _showAnalyzePayloadDialog(
+    BuildContext context,
+    Map<String, dynamic> payload, {
+    String title = 'Payload for analysis',
+    String? subtitle,
+  }) async {
     final json = const JsonEncoder.withIndent('  ').convert(payload);
     if (!context.mounted) return;
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Payload for analysis'),
+        title: Text(title),
         content: SizedBox(
           width: double.maxFinite,
           height: MediaQuery.sizeOf(ctx).height * 0.5,
           child: SingleChildScrollView(
-            child: SelectableText(
-              json,
-              style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                    fontFamily: 'monospace',
-                    fontSize: 11,
-                    height: 1.35,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (subtitle != null && subtitle.isNotEmpty) ...[
+                  Text(
+                    subtitle,
+                    style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(ctx).colorScheme.error,
+                        ),
                   ),
+                  const SizedBox(height: 12),
+                ],
+                SelectableText(
+                  json,
+                  style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                        height: 1.35,
+                      ),
+                ),
+              ],
             ),
           ),
         ),
@@ -139,6 +238,9 @@ class DiseaseResultScreen extends StatelessWidget {
       }
       loc['lat'] = lat ?? loc['lat'];
       loc['lon'] = lon ?? loc['lon'];
+      if (locationLabel != null && locationLabel!.isNotEmpty) {
+        loc['label'] = locationLabel;
+      }
       out['location'] = loc;
       out['timestamp'] = DateTime.now().toUtc().toIso8601String();
       return out;
@@ -148,7 +250,11 @@ class DiseaseResultScreen extends StatelessWidget {
       'confidence': confidence > 1 ? confidence : confidence * 100,
       'first_aid': treatment,
       'action_plan': remediationSteps ?? <String>[],
-      'location': <String, dynamic>{'lat': lat, 'lon': lon},
+      'location': <String, dynamic>{
+        'lat': lat,
+        'lon': lon,
+        if (locationLabel != null && locationLabel!.isNotEmpty) 'label': locationLabel,
+      },
       'timestamp': DateTime.now().toUtc().toIso8601String(),
     };
   }
@@ -512,6 +618,11 @@ class DiseaseResultScreen extends StatelessWidget {
                     const SizedBox(height: 8),
                     ..._topKRows(context, report['top_k_predictions'] as List),
                   ],
+                  const SizedBox(height: 20),
+                  GeminiAdvisorSection(
+                    fullReport: report,
+                    questionPrefill: geminiQuestionPrefill,
+                  ),
                 ],
                 const SizedBox(height: 24),
                 Text(
@@ -522,7 +633,7 @@ class DiseaseResultScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Reserve equipment or buy inputs near you (demo navigation).',
+                  'Reserve equipment or buy inputs near you.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.onSurfaceVariant,
                       ),
@@ -661,6 +772,330 @@ Iterable<Widget> _marketplaceSection(BuildContext context, Map marketplace) {
       ),
     ],
   ];
+}
+
+/// Uses `POST /api/v1/chatbot/ask-with-disease` with this screen’s [fullReport] as `disease_json`.
+class GeminiAdvisorSection extends StatefulWidget {
+  const GeminiAdvisorSection({
+    super.key,
+    required this.fullReport,
+    this.questionPrefill,
+  });
+
+  final Map<String, dynamic> fullReport;
+  final String? questionPrefill;
+
+  @override
+  State<GeminiAdvisorSection> createState() => _GeminiAdvisorSectionState();
+}
+
+class _GeminiAdvisorSectionState extends State<GeminiAdvisorSection> {
+  late final TextEditingController _question;
+  final CropDiseaseApiService _api = CropDiseaseApiService();
+  final AudioRecorder _recorder = AudioRecorder();
+
+  bool _busy = false;
+  bool _recording = false;
+  bool _sttBusy = false;
+  String? _audioPath;
+  String? _reply;
+
+  @override
+  void initState() {
+    super.initState();
+    final speech = widget.fullReport['speech_input']?.toString().trim() ?? '';
+    final pre = widget.questionPrefill?.trim() ?? '';
+    _question = TextEditingController(text: pre.isNotEmpty ? pre : speech);
+  }
+
+  @override
+  void dispose() {
+    _question.dispose();
+    _recorder.dispose();
+    super.dispose();
+  }
+
+  Future<void> _toggleRecord() async {
+    if (_recording) {
+      final path = await _recorder.stop();
+      if (!mounted) return;
+      setState(() {
+        _recording = false;
+        if (path != null) _audioPath = path;
+      });
+      return;
+    }
+
+    final perm = await Permission.microphone.request();
+    if (!perm.isGranted) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Microphone permission is required to record your question.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (!await _recorder.hasPermission()) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Recording is not available on this device.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final dir = await getTemporaryDirectory();
+    final path =
+        '${dir.path}/gemini_question_${DateTime.now().millisecondsSinceEpoch}.wav';
+
+    try {
+      await _recorder.start(
+        const RecordConfig(
+          encoder: AudioEncoder.wav,
+          sampleRate: 16000,
+          numChannels: 1,
+          bitRate: 128000,
+        ),
+        path: path,
+      );
+      if (!mounted) return;
+      setState(() {
+        _recording = true;
+        _audioPath = path;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not start recording: $e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _runStt() async {
+    final path = _audioPath;
+    if (path == null || !File(path).existsSync()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Record your question first, then tap Transcribe.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (_recording) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Stop recording before transcribing.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _sttBusy = true);
+    try {
+      final data = await _api.transcribeAudio(audioPath: path, mode: 'auto');
+      if (!mounted) return;
+      setState(() => _sttBusy = false);
+      final t = data['transcript']?.toString().trim() ?? '';
+      if (t.isNotEmpty) {
+        _question.text = t;
+        _question.selection = TextSelection.collapsed(offset: t.length);
+      }
+      if (data['error'] != null && data['error'].toString().isNotEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('STT: ${data['error']}'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _sttBusy = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(CropDiseaseApiService.dioErrorMessage(e)),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _ask() async {
+    final q = _question.text.trim();
+    final ap = _audioPath;
+    final hasAudio =
+        ap != null && File(ap).existsSync() && !_recording;
+
+    if (q.isEmpty && !hasAudio) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Record your question (then transcribe or tap Get AI advice), or type a question.',
+          ),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _busy = true;
+      _reply = null;
+    });
+    try {
+      final data = await _api.chatbotAskWithDisease(
+        diseaseJsonString: jsonEncode(widget.fullReport),
+        questionText: q.isNotEmpty ? q : null,
+        audioPath: hasAudio ? ap : null,
+        sessionId: 'disease_result_${DateTime.now().millisecondsSinceEpoch}',
+      );
+      if (!mounted) return;
+      final text = data['reply']?.toString().trim();
+      setState(() {
+        _busy = false;
+        _reply = (text != null && text.isNotEmpty) ? text : null;
+      });
+      if (_reply == null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No reply text in response.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(CropDiseaseApiService.dioErrorMessage(e)),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Ask about this scan',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: AppColors.primary,
+              ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Uses your diagnosis JSON and Gemini on the server (${kBaseUrl}). '
+          'Speak your question below—the app can send the audio directly, or '
+          'transcribe it into the text box first. If you send both, the server '
+          'uses the spoken audio as the question.',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppColors.onSurfaceVariant,
+                height: 1.35,
+              ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Speak your question',
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: AppColors.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: FilledButton.tonalIcon(
+                onPressed: (_busy || _sttBusy) ? null : _toggleRecord,
+                icon: Icon(
+                  _recording ? Icons.stop_rounded : Icons.mic_rounded,
+                ),
+                label: Text(_recording ? 'Stop' : 'Record'),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: OutlinedButton(
+                onPressed: (_busy || _sttBusy || _recording) ? null : _runStt,
+                child: _sttBusy
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primary,
+                        ),
+                      )
+                    : const Text('Transcribe'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _question,
+          minLines: 2,
+          maxLines: 4,
+          decoration: const InputDecoration(
+            labelText: 'Your question (optional if you send audio only)',
+            hintText: 'Filled by transcribe, or type here',
+            alignLabelWithHint: true,
+            border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          onPressed: (_busy || _recording) ? null : _ask,
+          icon: _busy
+              ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.onPrimaryFixed,
+                  ),
+                )
+              : const Icon(Icons.smart_toy_outlined, size: 20),
+          label: Text(_busy ? 'Asking…' : 'Get AI advice'),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.onPrimaryFixed,
+            padding: const EdgeInsets.symmetric(vertical: 14),
+          ),
+        ),
+        if (_reply != null) ...[
+          const SizedBox(height: 16),
+          Text(
+            'AI advice',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: 8),
+          SelectableText(
+            _reply!,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  height: 1.45,
+                  color: AppColors.onSurface,
+                ),
+          ),
+        ],
+      ],
+    );
+  }
 }
 
 Iterable<Widget> _topKRows(BuildContext context, List list) {

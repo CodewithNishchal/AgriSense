@@ -14,6 +14,7 @@ import '../../features/disease_risk/presentation/disease_risk_screen.dart';
 import '../../features/iot/presentation/iot_screen.dart';
 import '../../features/market/presentation/market_detail_screen.dart';
 import '../../features/market/presentation/market_list_screen.dart';
+import '../../features/ml_lab/presentation/ml_lab_screen.dart';
 import '../../features/more/presentation/more_screen.dart';
 import '../../features/satellite/presentation/satellite_screen.dart';
 import '../../features/schemes/presentation/schemes_eligibility_screen.dart';
@@ -31,7 +32,21 @@ import '../../features/auth/login.dart';
 import '../../features/auth/signup.dart';
 import '../session/user_prefs.dart';
 import '../session/user_role.dart';
+import '../widgets/app_info_page.dart';
 import 'app_shell.dart';
+
+IconData _infoPageIcon(String? key) {
+  switch (key) {
+    case 'settings':
+      return Icons.settings_rounded;
+    case 'help':
+      return Icons.help_outline_rounded;
+    case 'info':
+      return Icons.info_outline_rounded;
+    default:
+      return Icons.auto_awesome_rounded;
+  }
+}
 
 final GlobalKey<NavigatorState> _rootNavKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
@@ -229,6 +244,7 @@ GoRouter createAppRouter() {
             remediationSteps: steps,
             locationLabel: extra?['locationLabel'] as String?,
             fullReport: fullReport,
+            geminiQuestionPrefill: extra?['geminiQuestionPrefill'] as String?,
           );
         },
       ),
@@ -258,6 +274,27 @@ GoRouter createAppRouter() {
       ),
       GoRoute(path: '/yield', builder: (_, __) => const YieldScreen()),
       GoRoute(path: '/voice', builder: (_, __) => const VoiceScreen()),
+      GoRoute(
+        path: '/info',
+        builder: (context, state) {
+          final raw = state.extra;
+          if (raw is! Map) {
+            return const AppInfoPage(
+              title: 'Information',
+              icon: Icons.info_outline_rounded,
+            );
+          }
+          final m = Map<String, dynamic>.from(raw);
+          return AppInfoPage(
+            title: m['title'] as String? ?? 'Information',
+            icon: _infoPageIcon(m['icon'] as String?),
+            message: m['message'] as String?,
+            primaryRoute: m['primaryRoute'] as String?,
+            primaryLabel: m['primaryLabel'] as String?,
+          );
+        },
+      ),
+      GoRoute(path: '/ml-lab', builder: (_, __) => const MlLabScreen()),
       GoRoute(path: '/schemes', builder: (_, __) => const SchemesEligibilityScreen()),
       GoRoute(path: '/schemes/list', builder: (_, __) => const SchemesListScreen()),
       GoRoute(

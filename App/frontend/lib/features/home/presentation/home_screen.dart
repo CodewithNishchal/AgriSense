@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'agriNXT',
+                    'AgriSense',
                     style: Theme.of(context).textTheme.displaySmall?.copyWith(
                           color: AppColors.primary,
                           letterSpacing: -0.5,

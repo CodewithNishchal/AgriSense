@@ -41,7 +41,7 @@ class IoTScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Soil sensors (mock data)',
+                  'Soil sensors',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppColors.onSurface,
                       ),
