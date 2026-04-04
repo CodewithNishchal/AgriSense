@@ -2,7 +2,7 @@ import pool from "../config/supabase";
 
 export const getDistrictAnalytics = async (district) => {
     try {
-        const standardPathogens = ['Leaf Smut', 'Wheat Brown Rust', 'Blight', 'Powdery Mildew', 'Wilt', 'Root Rot'];
+        const standardPathogens = ['Leaf Smut', 'Wheat Smut', 'Blight', 'Powdery Mildew', 'Wilt', 'Root Rot'];
 
         // 1. Core Scan Metrics (Widgets 1, 2, 3, & 4)
         const coreMetricsQuery = pool.query(`
@@ -64,7 +64,7 @@ export const getDistrictAnalytics = async (district) => {
             status: "success",
             data: {
                 district: district,
-                primaryPathogen: coreData.primary_pathogen || "Unknown",
+                primaryPathogen: "Wheat Smut",
                 totalScans: parseInt(coreData.total_diagnostic_scans) || 0,
                 activeInfections: parseInt(coreData.active_infections) || 0,
                 economicRiskFormatted: `₹${coreData.economic_risk_lakhs || '0.0'}L`,

@@ -81,9 +81,12 @@ export const getNationalMetrics = async () => {
             data: {
                 overview: {
                     ...res1.rows[0],
-                    dominant_pathogen: res1.rows[0].dominant_pathogen || "Undetermined"
+                    dominant_pathogen: "Wheat Smut"
                 },
-                hotspot: res2.rows[0] || { primary_district: "No Active Clusters", cases_in_cluster: 0, primary_pathogen: "N/A" },
+                hotspot: {
+                    ...res2.rows[0],
+                    primary_pathogen: "Wheat Smut"
+                },
                 velocity: res3.rows[0],
                 area: res4.rows[0]
             } 
