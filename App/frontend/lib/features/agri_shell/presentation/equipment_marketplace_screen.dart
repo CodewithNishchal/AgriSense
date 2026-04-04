@@ -131,7 +131,7 @@ class _EquipmentMarketplaceScreenState extends State<EquipmentMarketplaceScreen>
                     ),
               );
               final filter = DropdownButtonFormField<String>(
-                value: _district,
+                initialValue: _district,
                 dropdownColor: AppColors.surfaceContainerHigh,
                 decoration: InputDecoration(
                   labelText: 'District',

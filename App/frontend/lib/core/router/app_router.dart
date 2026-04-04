@@ -216,6 +216,11 @@ GoRouter createAppRouter() {
           if (rawSteps is List) {
             steps = rawSteps.map((e) => e.toString()).toList();
           }
+          Map<String, dynamic>? fullReport;
+          final fr = extra?['fullReport'];
+          if (fr is Map) {
+            fullReport = Map<String, dynamic>.from(fr);
+          }
           return DiseaseResultScreen(
             diseaseName: extra?['diseaseName'] as String? ?? 'Unknown',
             confidence: (extra?['confidence'] as num?)?.toDouble() ?? 0,
@@ -223,6 +228,7 @@ GoRouter createAppRouter() {
             imagePath: extra?['imagePath'] as String?,
             remediationSteps: steps,
             locationLabel: extra?['locationLabel'] as String?,
+            fullReport: fullReport,
           );
         },
       ),
