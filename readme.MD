@@ -204,10 +204,4 @@ AgriSense combines:
 
 This design enables both field-level usage (app) and management-level visibility (dashboard).
 
-## 11) Next Recommended Improvements
-
-- add a formal model adapter interface for true runtime model switching
-- expose selected model backend in /health response
-- document exact quantized Keras artifact path and benchmark table
-- add a model comparison section (accuracy, latency, size)
 
